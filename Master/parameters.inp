@@ -1,0 +1,46 @@
+// Vertex model parameters
+kappa := 1;
+A0 := 1;
+gamma := 0.04;
+pzero := 0;
+edge_tension := 0.00;
+sigma_m := 0.025;  	   // Tension standard deviation
+tau_m := 150;          // Recovery time scale
+
+// Dynamics parameters
+dt := 3;
+sqdt := sqrt(dt);
+
+viscosity := 30;
+Lmin := 0.05; 		// minimum length threshold for T1 swap
+t1s_enabled := 1;
+
+// Division parameters
+
+// Cells must be half the mean division age before divisions can occur, in seconds
+mean_division_rate := 2.25;										// % Cells dividing per hour
+min_mitosis_age := 3600 * 100 / mean_division_rate /2;      	// Can divide once older than this
+mitosis_rate := 1/min_mitosis_age;								// Rate for cells to go into mitotic state
+
+// Dividing cells take about 30 minutes to grow and split
+min_division_age := 2000;  // Cells double in this time...
+division_rate := 1;        // ...then immediately divide
+
+// Wound parameters
+wound_tension := 0.08;
+wound_area_decay_time := 60; 	// Rate for wound "cell" area term in energy to shrink to zero
+wound_radius := 1.33;			// Radius in dimensionless units
+
+// Geometry of the wound
+wound_center_x := avg(vertex,x); // wound located at the center of the tissue, with input radius 
+wound_center_y := avg(vertex,y);
+wound_aspect_ratio := 1;
+
+
+// Other "under-the-hood" parameters 
+random_seed := 1; //seed for random number generation
+output_interval := 1; //how often to output wound size
+cell_output_interval := 10; //how often to output cell shapes - was 5
+img_output_interval := 20;
+simulation_step := 0; // initialize simulation step counter
+newf := -1;

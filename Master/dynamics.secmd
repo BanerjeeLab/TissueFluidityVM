@@ -1,0 +1,783 @@
+//-----------------------------------------------------------------//
+                          /*Math Commands*/
+//-----------------------------------------------------------------//
+//-----------------------------------------------------------------//
+/*sign function, gives the sign of a number*/
+function integer sgn(real some_number)
+{
+  local sign_of_some_number;
+  sign_of_some_number := some_number/(abs(some_number));
+
+return sign_of_some_number
+}
+//-----------------------------------------------------------------//
+/* * Evolver does not have a built-in gaussian random generator, this is my own quick implimentation:
+   * Returns member of set with a given mean and standard deviation
+   * mean: mean
+   * standard deviation: std_dev 
+   Returns random number in normal distribution centering on 0r.
+   ~95% of numbers returned should fall between -2 and 2
+   http://stackoverflow.com/questions/75677/converting-a-uniform-distribution-to-a-normal-distribution
+*/
+function real randn(real mean, real std_dev)
+{
+  local u1,v1,r1,c1;
+  r1 := -1;
+  while (r1 < 0 OR r1 > 1) do
+  {
+    u1 := 2*random-1;
+    v1 := 2*random-1;
+    r1 := u1*u1 + v1*v1
+  };
+  c1 := sqrt(-2*log(r1)/r1);
+  return u1*c1*std_dev+mean
+}
+
+//-----------------------------------------------------------------//
+//-----------------------------------------------------------------//
+                          /* Initialization */
+//-----------------------------------------------------------------//
+//-----------------------------------------------------------------//
+
+procedure init_one_cell(integer fid)
+{
+    local mycom;
+    mycom := sprintf "unset edges ar%g",fid; 
+    exec mycom;      
+    mycom := sprintf "set facet[%g].edge method_instance ar%g", fid, fid; 
+    exec mycom;
+    mycom := sprintf "unset edges perim%g",fid; 
+    exec mycom;
+    mycom := sprintf "set facet[%g].edge method_instance perim%g", fid, fid; 
+    exec mycom;
+};
+
+
+init_method_instance := 
+{
+    foreach facet ff do 
+    { 
+        init_one_cell(ff.id);
+    };
+}; 
+
+eq_energy :=
+{ 
+  local nn;
+  conj_grad on;
+  init_method_instance;
+  do {g 1; nn+=1} 
+  while (scale > 1e-10 AND nn < 1000); 
+  return
+}; 
+
+/* 1, random cell polarization with mean length 1, angle from uniform [0,2pi] */
+initialize_polarization_facet :=
+{
+    foreach facet ff do
+    {
+      ff.pol_angle:= random*2*PI;
+    } 
+};
+
+/* set all cell properties according to parameters file */
+
+procedure set_one_cell_properties(integer fid)
+{
+    if facet[fid].mitotic == 0 then
+    {
+        length_scale := 1;
+    }
+    else 
+    {
+        length_scale := sqrt(minimum(1 + facet[fid].cell_age / min_division_age, 2));
+    };
+    
+    local mycom;
+    
+    
+    mycom := sprintf "sq_farea%d.modulus := %f;",fid, kappa / 2; 
+    exec mycom; 
+    mycom := sprintf "farea%d.modulus := %f;",fid, kappa / 2 * length_scale * length_scale; 
+    exec mycom; 
+    mycom := sprintf "per%d.modulus := %f;",fid, gamma / 2; 
+    exec mycom;
+    mycom := sprintf "ten%d.modulus := %f;",fid, - gamma * pzero * length_scale; 
+    exec mycom;
+    
+};
+
+  
+procedure set_void_properties(integer fid)
+{
+    mycom := sprintf "sq_farea%d.modulus := %f;",fid, 0; 
+    exec mycom; 
+    mycom := sprintf "farea%d.modulus := %f;",fid, 0; 
+    exec mycom; 
+    mycom := sprintf "per%d.modulus := %f;",fid,0; 
+    exec mycom;
+    mycom := sprintf "ten%d.modulus := %f;",fid,0; 
+    exec mycom;
+};
+
+set_cell_properties:=
+{
+  local mycom;
+  local length_scale;
+  foreach facet ff where id != newf and not void do
+  {
+      set_one_cell_properties(ff.id);
+  };
+   
+  //f newf != -1 then set_void_properties(newf);
+
+    return 0
+};
+   
+
+//-----------------------------------------------------------------//
+                          /* Division */
+//-----------------------------------------------------------------//
+
+//Calculate only one cell center
+procedure get_one_cell_center (integer fid)
+{
+	local cx, cy;
+
+	cx := 0;
+	cy := 0;
+
+	//Weight by the length of the edges connected to the vertex
+	foreach facet[fid].edge ee do
+	{
+		cx += ee.length * (ee.vertex[1].x + ee.vertex[2].x) * 0.5;
+		cy += ee.length * (ee.vertex[1].y + ee.vertex[2].y) * 0.5;
+	};
+
+	facet[fid].center_x := cx/sum(facet[fid].edge, length);
+	facet[fid].center_y := cy/sum(facet[fid].edge, length);
+
+}
+
+
+//Calculates the cell centers
+get_cell_centers :=
+{
+
+	foreach facet ff do
+	{
+		get_one_cell_center(ff.id);
+	};
+
+}
+
+divided_last_step := 0;
+
+
+// Calculates the energy based of cells based on a split of edge[eid1] and edge[eid2]
+function real get_split_energy(integer fid, integer eid1, integer eid2)
+{
+    local pp1, pp2, aa1, aa2, current, dist;
+    
+    
+    // Add in cross length between the middle of the split edges
+    dist := ((edge[eid1].vertex[1].x + edge[eid1].vertex[2].x)/2 - (edge[eid2].vertex[1].x + edge[eid2].vertex[2].x)/2)**2;
+    dist += ((edge[eid1].vertex[1].y + edge[eid1].vertex[2].y)/2 - (edge[eid2].vertex[1].y + edge[eid2].vertex[2].y)/2)**2;
+    dist := sqrt(dist);
+    
+    pp1 := dist;
+    pp2 := dist;  
+    
+    current := 1;   // Which cell are we currently working on
+    
+    // First calculate the perimeters, loop over edges and add to the appropriate cell
+    foreach facet[fid].edge ee do
+    {
+        // Chenge cell if we are at a split edge, and add half length
+        if ee.id == eid1 or ee.id == eid2 then
+        {
+            pp1 += ee.length/2;
+            pp2 += ee.length/2;
+            
+            current := 3 - current;
+        }
+        else
+        {
+            if current == 1 then {pp1 += ee.length;} else {pp2 += ee.length};
+        };
+    };
+    
+    local num_verts, vid1, vid2, integral, first_eid;
+    
+    aa1 := 0;
+    aa2 := 0;
+    aa3 := 0;
+    
+    // This is the id of the first split edge encountered when going around the cell
+    first_eid := -1;   
+    num_verts := sum(facet[fid].vertex, 1);
+    
+    
+    // Now calculate area by integrating under the curves, vertices go around clockwise!
+    for (ii := 1; ii < num_verts + 1; ii++)
+    {
+         
+        vid1 := facet[fid].vertex[(ii imod num_verts) + 1].id;
+        vid2 := facet[fid].vertex[((ii + 1) imod num_verts) + 1].id;
+        
+        // Check if they are the vertices of the split edges
+        if (vid1 == edge[eid1].vertex[1].id and vid2 == edge[eid1].vertex[2].id) or (vid1 == edge[eid1].vertex[2].id and vid2 == edge[eid1].vertex[1].id) or (vid1 == edge[eid2].vertex[1].id and vid2 == edge[eid2].vertex[2].id) or (vid1 == edge[eid2].vertex[2].id and vid2 == edge[eid2].vertex[1].id) then
+        {
+            //Integrate half the line, add to current cell area, add the rest to the other cell area
+            integral := 0.5 * (1/2*vertex[vid2].y + 3/2*vertex[vid1].y) * (1/2*vertex[vid2].x - 1/2*vertex[vid1].x);
+            
+            if current == 1 then {aa1 += integral;} else {aa2 += integral;};
+
+            // Integrate the second half, add to the second cell
+            integral := 0.5 * (3/2*vertex[vid2].y + 1/2*vertex[vid1].y) * (1/2*vertex[vid2].x - 1/2*vertex[vid1].x);
+            
+            if current == 1 then {aa2 += integral;} else {aa1 += integral;};
+            
+            current := 3 - current;
+            
+            // Record the first edge when going around the cell vertices
+            if first_eid == -1 then
+            {
+                if (vid1 == edge[eid1].vertex[1].id and vid2 == edge[eid1].vertex[2].id) or (vid1 == edge[eid1].vertex[2].id and vid2 == edge[eid1].vertex[1].id) then {first_eid := eid1;} else {first_eid := eid2;};
+            }
+            // Add in area from new edge
+            else
+            {
+                integral := 0.5 * ((vertex[vid1].y + vertex[vid2].y)/2 + (edge[first_eid].vertex[1].y + edge[first_eid].vertex[2].y)/2) * ((vertex[vid1].x + vertex[vid2].x)/2 - (edge[first_eid].vertex[1].x + edge[first_eid].vertex[2].x)/2);
+                
+                aa1 += integral;
+                aa2 -= integral;
+
+            };
+        }
+        else
+        {
+            //Integrate normally
+            integral := 0.5 * (vertex[vid2].y + vertex[vid1].y) * (vertex[vid2].x - vertex[vid1].x);
+            
+            if current == 1 then {aa1 += integral;} else {aa2 += integral;};
+        }
+    };
+        
+    aa1 := - aa1;
+    aa2 := - aa2;
+        
+    // Calulate energy
+    return kappa / 2 * (aa1 - 1)**2 + gamma / 2 * pp1 **2 + edge_tension / 2 * pp1 + kappa / 2 * (aa2 - 1)**2 + gamma / 2 * pp2 **2 + edge_tension / 2 * pp2
+};
+
+
+// Divides cell given by facet[fid]
+procedure divide(integer fid)
+{    
+    // Get split that gives minimum energy
+    local eid1, eid2, split_energy, min_energy;
+    
+    min_energy := -1; // Flags that it hasn't been set
+    
+    foreach facet[fid].edge ee1 do
+    {
+        foreach facet[fid].edge ee2 where id != ee1.id do
+        {
+            split_energy := get_split_energy(fid, ee1.id, ee2.id);
+
+            if split_energy < min_energy or min_energy == -1 then
+            {
+                min_energy := split_energy;
+                eid1 := ee1.id;
+                eid2 := ee2.id;
+            }
+        };
+    };
+
+    refine edge[eid1];
+    refine edge[eid2];
+    
+    
+    // Cut facet in half! The new vertices are of valence 2
+    local vid1, vid2;
+    vid1 := -1;
+    
+    foreach facet[fid].vertex vv do
+    {
+        if vv.valence == 2 then
+        {
+            if vid1 == -1 then {vid1 := vv.id;} else {vid2 := vv.id};
+        }
+    };
+    
+    newe := facet_crosscut(fid, vid1, vid2);
+    
+    set edge[newe].facet mitotic 0;
+    set edge[newe].facet cell_age 0;
+    
+    set_one_cell_properties(edge[newe].facet[1].id);
+    set_one_cell_properties(edge[newe].facet[2].id);
+    init_one_cell(edge[newe].facet[1].id);
+    init_one_cell(edge[newe].facet[2].id);
+
+};
+
+
+// Changes cells from base to mitotic, and mitotic to dividing
+update_division_state :=
+{
+    foreach facet ff where not void do
+    {
+        if ff.mitotic == 0 then 
+        {
+            if random < mitosis_rate * dt and ff.cell_age > min_mitosis_age then
+            {
+                // Set mitotic
+                ff.mitotic := 1;
+                ff.cell_age := 0;
+                init_one_cell(ff.id);
+                set_one_cell_properties(ff.id);
+            }
+            else
+            {
+                ff.cell_age += dt;
+            };
+                    
+        }
+        else
+        {
+            if ff.cell_age < min_division_age then
+            {
+                ff.cell_age += dt;
+                set_one_cell_properties(ff.id);
+            }
+            else
+            {
+                divide(ff.id);
+                divided_last_step := 1;
+            };
+                    
+        };
+    };
+};
+
+
+
+//-----------------------------------------------------------------//
+                          /* Dynamics */
+//-----------------------------------------------------------------//
+
+
+// Flags whether or not an edge should be t1 edge swapped
+function integer should_t1(integer eid)
+{
+    if t1s_enabled == 0 then return 0;
+
+	// The edge must be below some minimum length
+	if edge[eid].length > Lmin then return 0;
+	
+	if sum(edge[eid].facet, 1) < 2 then return 0;
+
+	// If the forcing on the two vertices is reducing the length then we should t1 swap
+
+	// This is the dot product of the edge direction with the changing in the edge direction
+	return ((edge[eid].vertex[1].x - edge[eid].vertex[2].x)*(edge[eid].vertex[1].vel_x - edge[eid].vertex[2].vel_x) + (edge[eid].vertex[1].y - edge[eid].vertex[2].y)*(edge[eid].vertex[1].vel_y - edge[eid].vertex[2].vel_y) < 0);
+}
+
+
+function integer check_t1_reversed(integer eid, integer ff1, integer ff2, integer ff3, integer ff4)
+{
+    /*
+    Arguments
+    ---------
+
+    eid: edge id involved in T1
+
+    ff1-4: previous neighbouring cells before T1
+
+    Returns
+    -------
+
+    0 if the cells don't match else 1
+    */
+
+    // No previous t1 so not reversed
+    if ff1 == 0 or ff2 == 0 or ff3 == 0 or ff4 == 0 then {return 0};
+
+    define new_ids integer[4];
+    define old_ids integer[4];
+
+    new_ids := {edges[eid].cell1, edges[eid].cell2, edges[eid].cell3, edges[eid].cell4};
+    old_ids := {ff1, ff2, ff3, ff4};
+
+    local all_match, one_match;
+
+    all_match := 1;
+
+    // Check that each element exists
+    for (inx := 1 ; inx <= 4 ; inx++ )
+    {
+        one_match := 0;
+        for (jnx := 1; jnx <= 4; jnx++)
+        {
+            if new_ids[inx] == old_ids[jnx] then one_match := 1;
+        };
+
+        all_match *= one_match;
+    };
+
+    return all_match;
+}
+
+/* Attempt T1s */
+try_t1 :=
+{
+    local t1_wound, vid_1, vid_2, mycom, mymsg, ff1, ff2, ff3, ff4;
+    
+    foreach edge ee do
+    {
+        if should_t1(ee.id)
+        then
+        {
+            // Check to see if new neighbouring cells are the same as before ie the t1 reversed
+            ff1 := ee.cell1;
+            ff2 := ee.cell2;
+            ff3 := ee.cell3;
+            ff4 := ee.cell4;
+
+            // Update the current cells involved
+            ee.cell1 := ee.facets[1].id;
+            ee.cell2 := ee.facets[2].id;
+
+           // Set tension to bulk if it was on the wound
+           if sum(ee.facet where id == newf, 1) > 0 then
+           {
+               t1_wound := 1;
+           };
+           
+            ee.tension := edge_tension;
+                   
+            t1_edgeswap ee;
+            vid_1 := ee.vertex[1].id;
+            vid_2 := ee.vertex[2].id;
+		    
+            ee.cell3 := ee.facets[1].id;
+            ee.cell4 := ee.facets[2].id;
+
+            if check_t1_reversed(ee.id, ff1, ff2, ff3, ff4) then
+            {
+                ee.t1_count += 1;
+            }
+            else
+            {
+                ee.t1_count := 1;
+            };
+
+            // And record
+            if newf == -1 then
+            {
+                recname := sprintf "output/%s_unwounded_t1s.csv", output_name;
+                printf "%f,%f,%f,%f,%f\n", simulation_time, ee.id, ee.t1_count, simulation_time - ee.last_t1, sum(edges, 1)  >> recname;
+            }
+            else
+            {
+                recname := sprintf "output/%s_wounded_t1s.csv", output_name;
+
+                // Also get distance from wound
+                local effective_distance;
+                get_one_cell_center(newf);
+
+                // Distance to wound center
+                effective_distance := ((avg(ee.vertex, x) - facet[newf].center_x) ** 2 + (avg(ee.vertex, y) - facet[newf].center_y) ** 2) ** 0.5;
+
+                // Take off wound radius - meaning distances can be negative!
+                effective_distance -= (wound_area / PI) ** 0.5;
+
+                printf "%f,%f,%f,%f,%f,%f,%f\n", simulation_time, ee.id, ee.t1_count, simulation_time - ee.last_t1, sum(edges, 1), effective_distance, (wound_area / PI) ** 0.5  >> recname;
+            };    
+
+
+            // Update energy terms where necessary
+            foreach vertex[vid_1].facets ff where not void do
+			{
+				init_one_cell(ff.id);
+			};
+    
+			foreach vertex[vid_2].facets ff where not void do
+			{
+				init_one_cell(ff.id);
+			};
+
+            // Record the time, so we can get the time between t1s
+            ee.last_t1 := simulation_time;
+		};
+	};
+
+	// Need to update cell p0s around the wound
+    if t1_wound > 0 then {set_cell_properties;};
+    wound_t1s += t1_wound;
+
+}
+
+//-----------------------------------------------------------------//
+/* Get forces due to shape equilibrium model on each vertex */
+get_shape_forces :=
+{
+    g;
+    foreach vertex vv  do
+    {
+      vv.fx_shape := vv.v_force[1];
+      vv.fy_shape := vv.v_force[2];
+    } 
+}; 
+
+
+// Update fluctuating myosin levels only in bulk edges
+update_tension :=
+{
+    foreach edge ee where wound_edge == 0 do
+    {
+        ee.tension := ee.tension - dt/tau_m * (ee.tension - edge_tension) + randn(0, sigma_m * sqrt(2 * dt / tau_m));
+    };
+
+	// Increase wound tension over time - this is shared between edges on the same cell
+    foreach facet ff where wound_distance == 1 do
+    {
+        ff.purse_string_tension := ff.purse_string_tension - dt/tau_m * (ff.purse_string_tension - wound_tension) + randn(0, sigma_m * sqrt(2 * dt / tau_m));
+
+        foreach ff.edge ee where wound_edge do
+        {
+            ee.tension := ff.purse_string_tension;
+        };
+    };
+
+	// Add line tension to boundary cells to stop folding
+	set edge tension 0.25 where valence == 1;
+}
+
+// Reduce area elasticity term over time to simulate ablation
+update_wound_elasticity :=
+{
+    area_term := 1;
+    
+    mycom := sprintf "area_term := sq_farea%g.modulus", newf;
+    exec mycom;
+
+    // Reduce K
+    if area_term != 0 then
+    {
+        area_term := maximum(area_term - area_term * dt / wound_area_decay_time, 0);
+        
+        mycom := sprintf "sq_farea%g.modulus := area_term", newf;
+        exec mycom;
+        
+        mycom := sprintf "farea%g.modulus :=  area_term * cells_removed", newf;
+        exec mycom;
+    };
+};
+
+// Wound edges can have another point in the middle
+update_wound_edges :=
+{
+	delete edge ee where length < Lmin and sum(ee.vertex[1].edge, 1) == 2;
+	delete edge ee where length < Lmin and sum(ee.vertex[2].edge, 1) == 2;
+};
+
+
+//--------------------   Recording   -------------------------//
+
+// Put headers in the csv
+init_simulation_stats :=
+{    
+    recname := sprintf "output/%s_wounded_stats.csv", output_name;
+    printf "Time,Wound area,Wound perimeter,Wound edges,Wound T1s\n" >> recname;
+
+    recname := sprintf "output/%s_unwounded_t1s.csv", output_name;
+    printf "Time,Id,T1 Count,Last T1,Total Edges\n" >> recname;
+
+    recname := sprintf "output/%s_wounded_t1s.csv", output_name;
+    printf "Time,Id,T1 Count,Last T1,Total Edges,Distance,Wound radius\n" >> recname;
+};
+
+// Record stats during wound healing
+record_wounded_stats :=
+{
+    recname := sprintf "output/%s_wounded_stats.csv", output_name;
+
+	mycom := sprintf "wound_area := abs(ar%g.value)",newf;
+	exec mycom;
+
+    printf "%f,%f,%f,%f,%f\n", simulation_time, wound_area, sum(facet[newf].edge, length), sum(facet where wound_distance == 1, 1), wound_t1s  >> recname;
+
+};
+
+
+// Get cell distance from wound
+get_wound_distance :=
+{
+    set facet wound_distance 100;
+    
+    set facet[newf] wound_distance 0;
+    
+    local current_dist;
+    
+    current_dist := 0;
+    while max(facet, wound_distance) == 100 and current_dist < 100 do
+    {
+        // Flood fill the distance
+        foreach facet ff where wound_distance == current_dist do
+        {
+            // Set the distance for cells next to our current range
+            foreach ff.edge ee do
+            {
+                foreach ee.facet ff2 do
+                {
+                    ff2.wound_distance := minimum(ff2.wound_distance, current_dist+1);
+                };
+            };
+        };
+        
+        current_dist += 1;
+    };
+    
+    // Quit on error
+    if max(facet, wound_distance) == 100 then quit;
+}
+
+// Record vertices of cells around the wound to calculate their elongation
+record_wound_cell_shapes :=
+{
+    recname := sprintf "output/%s_wound_cells.txt", output_name;
+
+    // Record position of vertices
+    foreach facet ff where ff.initial_distance < 4 do
+    {
+        printf "%f,%f,%f,%f,", simulation_step, ff.id, ff.initial_distance, ff.wound_distance >> recname;
+    
+        foreach ff.vertex vv do
+        {
+            printf "%f,%f,", vv.x, vv.y >> recname;
+        };
+        
+        // Start a new line
+        printf "\n" >> recname;
+    };
+};
+
+
+cell_energy := 0;
+
+// Record energy of cells and distance from wound
+record_tissue_energy :=
+{
+    local mycom;
+
+    recname := sprintf "output/%s_tissue_energy.csv", output_name;
+
+    // Record position of vertices
+    foreach facet ff where ff.initial_distance < 4 do
+    {
+        printf "%f,%f,%f,%f,", simulation_step, ff.id, ff.initial_distance, ff.wound_distance >> recname;
+    
+        cell_energy := 0;
+
+        // Area contributions
+        mycom := sprintf "cell_energy := cell_energy + sq_farea%g.value;", ff.id; 
+        exec mycom;
+
+        mycom := sprintf "cell_energy := cell_energy + farea%g.value;", ff.id; 
+        exec mycom;
+
+        mycom := sprintf "cell_energy := cell_energy + 2 / kappa * (farea%g.modulus) ** 2;", ff.id; 
+        exec mycom;
+
+        mycom := sprintf "cell_energy := cell_energy + per%g.value;", ff.id;
+        exec mycom;
+
+        // Tension - shared between neighbours so divide by 2
+        foreach ff.edge ee do
+        {
+            cell_energy += ee.length * ee.tension / 2;
+        };
+        
+        printf "%f\n", cell_energy >> recname;
+    };
+};
+
+//-----------------   Simulation steps   ---------------------//
+
+// One step to relax tissues initially
+relax_one := 
+{
+    update_tension;
+    get_shape_forces;
+    
+    g;
+    try_t1;
+};
+
+// Full simulation step
+move_one := 
+{
+    get_wound_distance;
+
+	if recording AND newf != -1 AND simulation_step % img_output_interval == 0 then
+	{
+		imgname := sprintf "output/images/%s_%06d.ps", output_name, simulation_step;
+		postscript imgname;
+	};
+
+    if recording AND simulation_step % output_interval == 0 then
+    {
+        if newf != -1 then record_wounded_stats;
+    };
+
+    if recording AND newf != -1 and simulation_step % cell_output_interval == 0 then
+    {
+        record_wound_cell_shapes;
+        record_tissue_energy;
+    };
+
+    if divided_last_step == 1 then
+    {
+        divided_last_step := 0;
+    };
+
+    // If we have wounded the tissue
+    if newf != -1 then
+    {
+        update_wound_elasticity;
+        update_wound_edges;
+        
+        // Update which edges are at the wound
+        set edge wound_edge 0;
+        set facet[newf].edge wound_edge 1;
+	};
+
+	update_division_state;
+    update_tension;
+
+    get_shape_forces;
+
+    foreach vertex vv where !fixed do
+    { 
+        vv.vel_x := vv.fx_shape + avg(vv.facets,fx_active);
+        vv.vel_y := vv.fy_shape + avg(vv.facets,fy_active);
+        vv.x += dt * vv.vel_x / viscosity;
+        vv.y += dt * vv.vel_y / viscosity;
+    };
+
+    simulation_step += 1;
+    simulation_time += dt;
+    try_t1;
+    
+    set edge color black;
+    if newf != -1 then set facet[newf].edge color red;
+    
+    // Remove small cells
+    foreach facet ff where id != newf do
+    {
+        if sum(ff.edge, 1) < 4 and sum(ff.edge, length) < 0.6 then delete ff;
+    };
+};

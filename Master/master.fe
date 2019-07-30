@@ -1,0 +1,4927 @@
+// Surface Evolver Script 
+// obtain surface evolver from (http://facstaff.susqu.edu/brakke/evolver/evolver.html)
+
+STRING   						 // Model type : each cell is specified as a polygon defined by facets/edges/vertices 
+SPACE_DIMENSION 2 
+volume_method_name "edge_area"   // method used to calculate cell areas in string model 
+length_method_name "edge_length" // method used to calculate edge lengths in string model 
+
+
+define vertex attribute fx_shape real 
+define vertex attribute fy_shape real 
+define facet attribute fx_active real 
+define facet attribute fy_active real 
+define vertex attribute vel_x real 
+define vertex attribute vel_y real 
+define facet attribute pol_angle real
+define edge attribute last_t1_step integer 
+define facet attribute wound_facet integer 
+define edge attribute wound_edge integer
+
+define facet attribute mitotic integer
+define facet attribute void integer
+define facet attribute cell_age real
+define facet attribute center_x real
+define facet attribute center_y real
+define facet attribute wound_distance integer
+define facet attribute initial_distance integer
+define facet attribute purse_string_tension real
+
+define edge attribute last_t1 integer			// Time since last t1 - used to avoid counting oscillating t1s
+define edge attribute t1_count integer
+
+define edge attribute cell1 integer				// Id of all cells last in a t1 transition
+define edge attribute cell2 integer
+define edge attribute cell3 integer
+define edge attribute cell4 integer
+
+// Energy Declarations - include extra so that dividing cells have energy here
+
+method_instance ar1 method edge_area
+quantity sq_farea1 energy function ar1.value^2
+quantity farea1 energy function -2 * 1.000000 * abs(ar1.value)
+method_instance perim1 method edge_length
+quantity per1  energy function perim1.value^2 modulus 0
+quantity ten1  energy function 1.000000*perim1.value modulus 0
+
+method_instance ar2 method edge_area
+quantity sq_farea2 energy function ar2.value^2
+quantity farea2 energy function -2 * 1.000000 * abs(ar2.value)
+method_instance perim2 method edge_length
+quantity per2  energy function perim2.value^2 modulus 0
+quantity ten2  energy function 1.000000*perim2.value modulus 0
+
+method_instance ar3 method edge_area
+quantity sq_farea3 energy function ar3.value^2
+quantity farea3 energy function -2 * 1.000000 * abs(ar3.value)
+method_instance perim3 method edge_length
+quantity per3  energy function perim3.value^2 modulus 0
+quantity ten3  energy function 1.000000*perim3.value modulus 0
+
+method_instance ar4 method edge_area
+quantity sq_farea4 energy function ar4.value^2
+quantity farea4 energy function -2 * 1.000000 * abs(ar4.value)
+method_instance perim4 method edge_length
+quantity per4  energy function perim4.value^2 modulus 0
+quantity ten4  energy function 1.000000*perim4.value modulus 0
+
+method_instance ar5 method edge_area
+quantity sq_farea5 energy function ar5.value^2
+quantity farea5 energy function -2 * 1.000000 * abs(ar5.value)
+method_instance perim5 method edge_length
+quantity per5  energy function perim5.value^2 modulus 0
+quantity ten5  energy function 1.000000*perim5.value modulus 0
+
+method_instance ar6 method edge_area
+quantity sq_farea6 energy function ar6.value^2
+quantity farea6 energy function -2 * 1.000000 * abs(ar6.value)
+method_instance perim6 method edge_length
+quantity per6  energy function perim6.value^2 modulus 0
+quantity ten6  energy function 1.000000*perim6.value modulus 0
+
+method_instance ar7 method edge_area
+quantity sq_farea7 energy function ar7.value^2
+quantity farea7 energy function -2 * 1.000000 * abs(ar7.value)
+method_instance perim7 method edge_length
+quantity per7  energy function perim7.value^2 modulus 0
+quantity ten7  energy function 1.000000*perim7.value modulus 0
+
+method_instance ar8 method edge_area
+quantity sq_farea8 energy function ar8.value^2
+quantity farea8 energy function -2 * 1.000000 * abs(ar8.value)
+method_instance perim8 method edge_length
+quantity per8  energy function perim8.value^2 modulus 0
+quantity ten8  energy function 1.000000*perim8.value modulus 0
+
+method_instance ar9 method edge_area
+quantity sq_farea9 energy function ar9.value^2
+quantity farea9 energy function -2 * 1.000000 * abs(ar9.value)
+method_instance perim9 method edge_length
+quantity per9  energy function perim9.value^2 modulus 0
+quantity ten9  energy function 1.000000*perim9.value modulus 0
+
+method_instance ar10 method edge_area
+quantity sq_farea10 energy function ar10.value^2
+quantity farea10 energy function -2 * 1.000000 * abs(ar10.value)
+method_instance perim10 method edge_length
+quantity per10  energy function perim10.value^2 modulus 0
+quantity ten10  energy function 1.000000*perim10.value modulus 0
+
+method_instance ar11 method edge_area
+quantity sq_farea11 energy function ar11.value^2
+quantity farea11 energy function -2 * 1.000000 * abs(ar11.value)
+method_instance perim11 method edge_length
+quantity per11  energy function perim11.value^2 modulus 0
+quantity ten11  energy function 1.000000*perim11.value modulus 0
+
+method_instance ar12 method edge_area
+quantity sq_farea12 energy function ar12.value^2
+quantity farea12 energy function -2 * 1.000000 * abs(ar12.value)
+method_instance perim12 method edge_length
+quantity per12  energy function perim12.value^2 modulus 0
+quantity ten12  energy function 1.000000*perim12.value modulus 0
+
+method_instance ar13 method edge_area
+quantity sq_farea13 energy function ar13.value^2
+quantity farea13 energy function -2 * 1.000000 * abs(ar13.value)
+method_instance perim13 method edge_length
+quantity per13  energy function perim13.value^2 modulus 0
+quantity ten13  energy function 1.000000*perim13.value modulus 0
+
+method_instance ar14 method edge_area
+quantity sq_farea14 energy function ar14.value^2
+quantity farea14 energy function -2 * 1.000000 * abs(ar14.value)
+method_instance perim14 method edge_length
+quantity per14  energy function perim14.value^2 modulus 0
+quantity ten14  energy function 1.000000*perim14.value modulus 0
+
+method_instance ar15 method edge_area
+quantity sq_farea15 energy function ar15.value^2
+quantity farea15 energy function -2 * 1.000000 * abs(ar15.value)
+method_instance perim15 method edge_length
+quantity per15  energy function perim15.value^2 modulus 0
+quantity ten15  energy function 1.000000*perim15.value modulus 0
+
+method_instance ar16 method edge_area
+quantity sq_farea16 energy function ar16.value^2
+quantity farea16 energy function -2 * 1.000000 * abs(ar16.value)
+method_instance perim16 method edge_length
+quantity per16  energy function perim16.value^2 modulus 0
+quantity ten16  energy function 1.000000*perim16.value modulus 0
+
+method_instance ar17 method edge_area
+quantity sq_farea17 energy function ar17.value^2
+quantity farea17 energy function -2 * 1.000000 * abs(ar17.value)
+method_instance perim17 method edge_length
+quantity per17  energy function perim17.value^2 modulus 0
+quantity ten17  energy function 1.000000*perim17.value modulus 0
+
+method_instance ar18 method edge_area
+quantity sq_farea18 energy function ar18.value^2
+quantity farea18 energy function -2 * 1.000000 * abs(ar18.value)
+method_instance perim18 method edge_length
+quantity per18  energy function perim18.value^2 modulus 0
+quantity ten18  energy function 1.000000*perim18.value modulus 0
+
+method_instance ar19 method edge_area
+quantity sq_farea19 energy function ar19.value^2
+quantity farea19 energy function -2 * 1.000000 * abs(ar19.value)
+method_instance perim19 method edge_length
+quantity per19  energy function perim19.value^2 modulus 0
+quantity ten19  energy function 1.000000*perim19.value modulus 0
+
+method_instance ar20 method edge_area
+quantity sq_farea20 energy function ar20.value^2
+quantity farea20 energy function -2 * 1.000000 * abs(ar20.value)
+method_instance perim20 method edge_length
+quantity per20  energy function perim20.value^2 modulus 0
+quantity ten20  energy function 1.000000*perim20.value modulus 0
+
+method_instance ar21 method edge_area
+quantity sq_farea21 energy function ar21.value^2
+quantity farea21 energy function -2 * 1.000000 * abs(ar21.value)
+method_instance perim21 method edge_length
+quantity per21  energy function perim21.value^2 modulus 0
+quantity ten21  energy function 1.000000*perim21.value modulus 0
+
+method_instance ar22 method edge_area
+quantity sq_farea22 energy function ar22.value^2
+quantity farea22 energy function -2 * 1.000000 * abs(ar22.value)
+method_instance perim22 method edge_length
+quantity per22  energy function perim22.value^2 modulus 0
+quantity ten22  energy function 1.000000*perim22.value modulus 0
+
+method_instance ar23 method edge_area
+quantity sq_farea23 energy function ar23.value^2
+quantity farea23 energy function -2 * 1.000000 * abs(ar23.value)
+method_instance perim23 method edge_length
+quantity per23  energy function perim23.value^2 modulus 0
+quantity ten23  energy function 1.000000*perim23.value modulus 0
+
+method_instance ar24 method edge_area
+quantity sq_farea24 energy function ar24.value^2
+quantity farea24 energy function -2 * 1.000000 * abs(ar24.value)
+method_instance perim24 method edge_length
+quantity per24  energy function perim24.value^2 modulus 0
+quantity ten24  energy function 1.000000*perim24.value modulus 0
+
+method_instance ar25 method edge_area
+quantity sq_farea25 energy function ar25.value^2
+quantity farea25 energy function -2 * 1.000000 * abs(ar25.value)
+method_instance perim25 method edge_length
+quantity per25  energy function perim25.value^2 modulus 0
+quantity ten25  energy function 1.000000*perim25.value modulus 0
+
+method_instance ar26 method edge_area
+quantity sq_farea26 energy function ar26.value^2
+quantity farea26 energy function -2 * 1.000000 * abs(ar26.value)
+method_instance perim26 method edge_length
+quantity per26  energy function perim26.value^2 modulus 0
+quantity ten26  energy function 1.000000*perim26.value modulus 0
+
+method_instance ar27 method edge_area
+quantity sq_farea27 energy function ar27.value^2
+quantity farea27 energy function -2 * 1.000000 * abs(ar27.value)
+method_instance perim27 method edge_length
+quantity per27  energy function perim27.value^2 modulus 0
+quantity ten27  energy function 1.000000*perim27.value modulus 0
+
+method_instance ar28 method edge_area
+quantity sq_farea28 energy function ar28.value^2
+quantity farea28 energy function -2 * 1.000000 * abs(ar28.value)
+method_instance perim28 method edge_length
+quantity per28  energy function perim28.value^2 modulus 0
+quantity ten28  energy function 1.000000*perim28.value modulus 0
+
+method_instance ar29 method edge_area
+quantity sq_farea29 energy function ar29.value^2
+quantity farea29 energy function -2 * 1.000000 * abs(ar29.value)
+method_instance perim29 method edge_length
+quantity per29  energy function perim29.value^2 modulus 0
+quantity ten29  energy function 1.000000*perim29.value modulus 0
+
+method_instance ar30 method edge_area
+quantity sq_farea30 energy function ar30.value^2
+quantity farea30 energy function -2 * 1.000000 * abs(ar30.value)
+method_instance perim30 method edge_length
+quantity per30  energy function perim30.value^2 modulus 0
+quantity ten30  energy function 1.000000*perim30.value modulus 0
+
+method_instance ar31 method edge_area
+quantity sq_farea31 energy function ar31.value^2
+quantity farea31 energy function -2 * 1.000000 * abs(ar31.value)
+method_instance perim31 method edge_length
+quantity per31  energy function perim31.value^2 modulus 0
+quantity ten31  energy function 1.000000*perim31.value modulus 0
+
+method_instance ar32 method edge_area
+quantity sq_farea32 energy function ar32.value^2
+quantity farea32 energy function -2 * 1.000000 * abs(ar32.value)
+method_instance perim32 method edge_length
+quantity per32  energy function perim32.value^2 modulus 0
+quantity ten32  energy function 1.000000*perim32.value modulus 0
+
+method_instance ar33 method edge_area
+quantity sq_farea33 energy function ar33.value^2
+quantity farea33 energy function -2 * 1.000000 * abs(ar33.value)
+method_instance perim33 method edge_length
+quantity per33  energy function perim33.value^2 modulus 0
+quantity ten33  energy function 1.000000*perim33.value modulus 0
+
+method_instance ar34 method edge_area
+quantity sq_farea34 energy function ar34.value^2
+quantity farea34 energy function -2 * 1.000000 * abs(ar34.value)
+method_instance perim34 method edge_length
+quantity per34  energy function perim34.value^2 modulus 0
+quantity ten34  energy function 1.000000*perim34.value modulus 0
+
+method_instance ar35 method edge_area
+quantity sq_farea35 energy function ar35.value^2
+quantity farea35 energy function -2 * 1.000000 * abs(ar35.value)
+method_instance perim35 method edge_length
+quantity per35  energy function perim35.value^2 modulus 0
+quantity ten35  energy function 1.000000*perim35.value modulus 0
+
+method_instance ar36 method edge_area
+quantity sq_farea36 energy function ar36.value^2
+quantity farea36 energy function -2 * 1.000000 * abs(ar36.value)
+method_instance perim36 method edge_length
+quantity per36  energy function perim36.value^2 modulus 0
+quantity ten36  energy function 1.000000*perim36.value modulus 0
+
+method_instance ar37 method edge_area
+quantity sq_farea37 energy function ar37.value^2
+quantity farea37 energy function -2 * 1.000000 * abs(ar37.value)
+method_instance perim37 method edge_length
+quantity per37  energy function perim37.value^2 modulus 0
+quantity ten37  energy function 1.000000*perim37.value modulus 0
+
+method_instance ar38 method edge_area
+quantity sq_farea38 energy function ar38.value^2
+quantity farea38 energy function -2 * 1.000000 * abs(ar38.value)
+method_instance perim38 method edge_length
+quantity per38  energy function perim38.value^2 modulus 0
+quantity ten38  energy function 1.000000*perim38.value modulus 0
+
+method_instance ar39 method edge_area
+quantity sq_farea39 energy function ar39.value^2
+quantity farea39 energy function -2 * 1.000000 * abs(ar39.value)
+method_instance perim39 method edge_length
+quantity per39  energy function perim39.value^2 modulus 0
+quantity ten39  energy function 1.000000*perim39.value modulus 0
+
+method_instance ar40 method edge_area
+quantity sq_farea40 energy function ar40.value^2
+quantity farea40 energy function -2 * 1.000000 * abs(ar40.value)
+method_instance perim40 method edge_length
+quantity per40  energy function perim40.value^2 modulus 0
+quantity ten40  energy function 1.000000*perim40.value modulus 0
+
+method_instance ar41 method edge_area
+quantity sq_farea41 energy function ar41.value^2
+quantity farea41 energy function -2 * 1.000000 * abs(ar41.value)
+method_instance perim41 method edge_length
+quantity per41  energy function perim41.value^2 modulus 0
+quantity ten41  energy function 1.000000*perim41.value modulus 0
+
+method_instance ar42 method edge_area
+quantity sq_farea42 energy function ar42.value^2
+quantity farea42 energy function -2 * 1.000000 * abs(ar42.value)
+method_instance perim42 method edge_length
+quantity per42  energy function perim42.value^2 modulus 0
+quantity ten42  energy function 1.000000*perim42.value modulus 0
+
+method_instance ar43 method edge_area
+quantity sq_farea43 energy function ar43.value^2
+quantity farea43 energy function -2 * 1.000000 * abs(ar43.value)
+method_instance perim43 method edge_length
+quantity per43  energy function perim43.value^2 modulus 0
+quantity ten43  energy function 1.000000*perim43.value modulus 0
+
+method_instance ar44 method edge_area
+quantity sq_farea44 energy function ar44.value^2
+quantity farea44 energy function -2 * 1.000000 * abs(ar44.value)
+method_instance perim44 method edge_length
+quantity per44  energy function perim44.value^2 modulus 0
+quantity ten44  energy function 1.000000*perim44.value modulus 0
+
+method_instance ar45 method edge_area
+quantity sq_farea45 energy function ar45.value^2
+quantity farea45 energy function -2 * 1.000000 * abs(ar45.value)
+method_instance perim45 method edge_length
+quantity per45  energy function perim45.value^2 modulus 0
+quantity ten45  energy function 1.000000*perim45.value modulus 0
+
+method_instance ar46 method edge_area
+quantity sq_farea46 energy function ar46.value^2
+quantity farea46 energy function -2 * 1.000000 * abs(ar46.value)
+method_instance perim46 method edge_length
+quantity per46  energy function perim46.value^2 modulus 0
+quantity ten46  energy function 1.000000*perim46.value modulus 0
+
+method_instance ar47 method edge_area
+quantity sq_farea47 energy function ar47.value^2
+quantity farea47 energy function -2 * 1.000000 * abs(ar47.value)
+method_instance perim47 method edge_length
+quantity per47  energy function perim47.value^2 modulus 0
+quantity ten47  energy function 1.000000*perim47.value modulus 0
+
+method_instance ar48 method edge_area
+quantity sq_farea48 energy function ar48.value^2
+quantity farea48 energy function -2 * 1.000000 * abs(ar48.value)
+method_instance perim48 method edge_length
+quantity per48  energy function perim48.value^2 modulus 0
+quantity ten48  energy function 1.000000*perim48.value modulus 0
+
+method_instance ar49 method edge_area
+quantity sq_farea49 energy function ar49.value^2
+quantity farea49 energy function -2 * 1.000000 * abs(ar49.value)
+method_instance perim49 method edge_length
+quantity per49  energy function perim49.value^2 modulus 0
+quantity ten49  energy function 1.000000*perim49.value modulus 0
+
+method_instance ar50 method edge_area
+quantity sq_farea50 energy function ar50.value^2
+quantity farea50 energy function -2 * 1.000000 * abs(ar50.value)
+method_instance perim50 method edge_length
+quantity per50  energy function perim50.value^2 modulus 0
+quantity ten50  energy function 1.000000*perim50.value modulus 0
+
+method_instance ar51 method edge_area
+quantity sq_farea51 energy function ar51.value^2
+quantity farea51 energy function -2 * 1.000000 * abs(ar51.value)
+method_instance perim51 method edge_length
+quantity per51  energy function perim51.value^2 modulus 0
+quantity ten51  energy function 1.000000*perim51.value modulus 0
+
+method_instance ar52 method edge_area
+quantity sq_farea52 energy function ar52.value^2
+quantity farea52 energy function -2 * 1.000000 * abs(ar52.value)
+method_instance perim52 method edge_length
+quantity per52  energy function perim52.value^2 modulus 0
+quantity ten52  energy function 1.000000*perim52.value modulus 0
+
+method_instance ar53 method edge_area
+quantity sq_farea53 energy function ar53.value^2
+quantity farea53 energy function -2 * 1.000000 * abs(ar53.value)
+method_instance perim53 method edge_length
+quantity per53  energy function perim53.value^2 modulus 0
+quantity ten53  energy function 1.000000*perim53.value modulus 0
+
+method_instance ar54 method edge_area
+quantity sq_farea54 energy function ar54.value^2
+quantity farea54 energy function -2 * 1.000000 * abs(ar54.value)
+method_instance perim54 method edge_length
+quantity per54  energy function perim54.value^2 modulus 0
+quantity ten54  energy function 1.000000*perim54.value modulus 0
+
+method_instance ar55 method edge_area
+quantity sq_farea55 energy function ar55.value^2
+quantity farea55 energy function -2 * 1.000000 * abs(ar55.value)
+method_instance perim55 method edge_length
+quantity per55  energy function perim55.value^2 modulus 0
+quantity ten55  energy function 1.000000*perim55.value modulus 0
+
+method_instance ar56 method edge_area
+quantity sq_farea56 energy function ar56.value^2
+quantity farea56 energy function -2 * 1.000000 * abs(ar56.value)
+method_instance perim56 method edge_length
+quantity per56  energy function perim56.value^2 modulus 0
+quantity ten56  energy function 1.000000*perim56.value modulus 0
+
+method_instance ar57 method edge_area
+quantity sq_farea57 energy function ar57.value^2
+quantity farea57 energy function -2 * 1.000000 * abs(ar57.value)
+method_instance perim57 method edge_length
+quantity per57  energy function perim57.value^2 modulus 0
+quantity ten57  energy function 1.000000*perim57.value modulus 0
+
+method_instance ar58 method edge_area
+quantity sq_farea58 energy function ar58.value^2
+quantity farea58 energy function -2 * 1.000000 * abs(ar58.value)
+method_instance perim58 method edge_length
+quantity per58  energy function perim58.value^2 modulus 0
+quantity ten58  energy function 1.000000*perim58.value modulus 0
+
+method_instance ar59 method edge_area
+quantity sq_farea59 energy function ar59.value^2
+quantity farea59 energy function -2 * 1.000000 * abs(ar59.value)
+method_instance perim59 method edge_length
+quantity per59  energy function perim59.value^2 modulus 0
+quantity ten59  energy function 1.000000*perim59.value modulus 0
+
+method_instance ar60 method edge_area
+quantity sq_farea60 energy function ar60.value^2
+quantity farea60 energy function -2 * 1.000000 * abs(ar60.value)
+method_instance perim60 method edge_length
+quantity per60  energy function perim60.value^2 modulus 0
+quantity ten60  energy function 1.000000*perim60.value modulus 0
+
+method_instance ar61 method edge_area
+quantity sq_farea61 energy function ar61.value^2
+quantity farea61 energy function -2 * 1.000000 * abs(ar61.value)
+method_instance perim61 method edge_length
+quantity per61  energy function perim61.value^2 modulus 0
+quantity ten61  energy function 1.000000*perim61.value modulus 0
+
+method_instance ar62 method edge_area
+quantity sq_farea62 energy function ar62.value^2
+quantity farea62 energy function -2 * 1.000000 * abs(ar62.value)
+method_instance perim62 method edge_length
+quantity per62  energy function perim62.value^2 modulus 0
+quantity ten62  energy function 1.000000*perim62.value modulus 0
+
+method_instance ar63 method edge_area
+quantity sq_farea63 energy function ar63.value^2
+quantity farea63 energy function -2 * 1.000000 * abs(ar63.value)
+method_instance perim63 method edge_length
+quantity per63  energy function perim63.value^2 modulus 0
+quantity ten63  energy function 1.000000*perim63.value modulus 0
+
+method_instance ar64 method edge_area
+quantity sq_farea64 energy function ar64.value^2
+quantity farea64 energy function -2 * 1.000000 * abs(ar64.value)
+method_instance perim64 method edge_length
+quantity per64  energy function perim64.value^2 modulus 0
+quantity ten64  energy function 1.000000*perim64.value modulus 0
+
+method_instance ar65 method edge_area
+quantity sq_farea65 energy function ar65.value^2
+quantity farea65 energy function -2 * 1.000000 * abs(ar65.value)
+method_instance perim65 method edge_length
+quantity per65  energy function perim65.value^2 modulus 0
+quantity ten65  energy function 1.000000*perim65.value modulus 0
+
+method_instance ar66 method edge_area
+quantity sq_farea66 energy function ar66.value^2
+quantity farea66 energy function -2 * 1.000000 * abs(ar66.value)
+method_instance perim66 method edge_length
+quantity per66  energy function perim66.value^2 modulus 0
+quantity ten66  energy function 1.000000*perim66.value modulus 0
+
+method_instance ar67 method edge_area
+quantity sq_farea67 energy function ar67.value^2
+quantity farea67 energy function -2 * 1.000000 * abs(ar67.value)
+method_instance perim67 method edge_length
+quantity per67  energy function perim67.value^2 modulus 0
+quantity ten67  energy function 1.000000*perim67.value modulus 0
+
+method_instance ar68 method edge_area
+quantity sq_farea68 energy function ar68.value^2
+quantity farea68 energy function -2 * 1.000000 * abs(ar68.value)
+method_instance perim68 method edge_length
+quantity per68  energy function perim68.value^2 modulus 0
+quantity ten68  energy function 1.000000*perim68.value modulus 0
+
+method_instance ar69 method edge_area
+quantity sq_farea69 energy function ar69.value^2
+quantity farea69 energy function -2 * 1.000000 * abs(ar69.value)
+method_instance perim69 method edge_length
+quantity per69  energy function perim69.value^2 modulus 0
+quantity ten69  energy function 1.000000*perim69.value modulus 0
+
+method_instance ar70 method edge_area
+quantity sq_farea70 energy function ar70.value^2
+quantity farea70 energy function -2 * 1.000000 * abs(ar70.value)
+method_instance perim70 method edge_length
+quantity per70  energy function perim70.value^2 modulus 0
+quantity ten70  energy function 1.000000*perim70.value modulus 0
+
+method_instance ar71 method edge_area
+quantity sq_farea71 energy function ar71.value^2
+quantity farea71 energy function -2 * 1.000000 * abs(ar71.value)
+method_instance perim71 method edge_length
+quantity per71  energy function perim71.value^2 modulus 0
+quantity ten71  energy function 1.000000*perim71.value modulus 0
+
+method_instance ar72 method edge_area
+quantity sq_farea72 energy function ar72.value^2
+quantity farea72 energy function -2 * 1.000000 * abs(ar72.value)
+method_instance perim72 method edge_length
+quantity per72  energy function perim72.value^2 modulus 0
+quantity ten72  energy function 1.000000*perim72.value modulus 0
+
+method_instance ar73 method edge_area
+quantity sq_farea73 energy function ar73.value^2
+quantity farea73 energy function -2 * 1.000000 * abs(ar73.value)
+method_instance perim73 method edge_length
+quantity per73  energy function perim73.value^2 modulus 0
+quantity ten73  energy function 1.000000*perim73.value modulus 0
+
+method_instance ar74 method edge_area
+quantity sq_farea74 energy function ar74.value^2
+quantity farea74 energy function -2 * 1.000000 * abs(ar74.value)
+method_instance perim74 method edge_length
+quantity per74  energy function perim74.value^2 modulus 0
+quantity ten74  energy function 1.000000*perim74.value modulus 0
+
+method_instance ar75 method edge_area
+quantity sq_farea75 energy function ar75.value^2
+quantity farea75 energy function -2 * 1.000000 * abs(ar75.value)
+method_instance perim75 method edge_length
+quantity per75  energy function perim75.value^2 modulus 0
+quantity ten75  energy function 1.000000*perim75.value modulus 0
+
+method_instance ar76 method edge_area
+quantity sq_farea76 energy function ar76.value^2
+quantity farea76 energy function -2 * 1.000000 * abs(ar76.value)
+method_instance perim76 method edge_length
+quantity per76  energy function perim76.value^2 modulus 0
+quantity ten76  energy function 1.000000*perim76.value modulus 0
+
+method_instance ar77 method edge_area
+quantity sq_farea77 energy function ar77.value^2
+quantity farea77 energy function -2 * 1.000000 * abs(ar77.value)
+method_instance perim77 method edge_length
+quantity per77  energy function perim77.value^2 modulus 0
+quantity ten77  energy function 1.000000*perim77.value modulus 0
+
+method_instance ar78 method edge_area
+quantity sq_farea78 energy function ar78.value^2
+quantity farea78 energy function -2 * 1.000000 * abs(ar78.value)
+method_instance perim78 method edge_length
+quantity per78  energy function perim78.value^2 modulus 0
+quantity ten78  energy function 1.000000*perim78.value modulus 0
+
+method_instance ar79 method edge_area
+quantity sq_farea79 energy function ar79.value^2
+quantity farea79 energy function -2 * 1.000000 * abs(ar79.value)
+method_instance perim79 method edge_length
+quantity per79  energy function perim79.value^2 modulus 0
+quantity ten79  energy function 1.000000*perim79.value modulus 0
+
+method_instance ar80 method edge_area
+quantity sq_farea80 energy function ar80.value^2
+quantity farea80 energy function -2 * 1.000000 * abs(ar80.value)
+method_instance perim80 method edge_length
+quantity per80  energy function perim80.value^2 modulus 0
+quantity ten80  energy function 1.000000*perim80.value modulus 0
+
+method_instance ar81 method edge_area
+quantity sq_farea81 energy function ar81.value^2
+quantity farea81 energy function -2 * 1.000000 * abs(ar81.value)
+method_instance perim81 method edge_length
+quantity per81  energy function perim81.value^2 modulus 0
+quantity ten81  energy function 1.000000*perim81.value modulus 0
+
+method_instance ar82 method edge_area
+quantity sq_farea82 energy function ar82.value^2
+quantity farea82 energy function -2 * 1.000000 * abs(ar82.value)
+method_instance perim82 method edge_length
+quantity per82  energy function perim82.value^2 modulus 0
+quantity ten82  energy function 1.000000*perim82.value modulus 0
+
+method_instance ar83 method edge_area
+quantity sq_farea83 energy function ar83.value^2
+quantity farea83 energy function -2 * 1.000000 * abs(ar83.value)
+method_instance perim83 method edge_length
+quantity per83  energy function perim83.value^2 modulus 0
+quantity ten83  energy function 1.000000*perim83.value modulus 0
+
+method_instance ar84 method edge_area
+quantity sq_farea84 energy function ar84.value^2
+quantity farea84 energy function -2 * 1.000000 * abs(ar84.value)
+method_instance perim84 method edge_length
+quantity per84  energy function perim84.value^2 modulus 0
+quantity ten84  energy function 1.000000*perim84.value modulus 0
+
+method_instance ar85 method edge_area
+quantity sq_farea85 energy function ar85.value^2
+quantity farea85 energy function -2 * 1.000000 * abs(ar85.value)
+method_instance perim85 method edge_length
+quantity per85  energy function perim85.value^2 modulus 0
+quantity ten85  energy function 1.000000*perim85.value modulus 0
+
+method_instance ar86 method edge_area
+quantity sq_farea86 energy function ar86.value^2
+quantity farea86 energy function -2 * 1.000000 * abs(ar86.value)
+method_instance perim86 method edge_length
+quantity per86  energy function perim86.value^2 modulus 0
+quantity ten86  energy function 1.000000*perim86.value modulus 0
+
+method_instance ar87 method edge_area
+quantity sq_farea87 energy function ar87.value^2
+quantity farea87 energy function -2 * 1.000000 * abs(ar87.value)
+method_instance perim87 method edge_length
+quantity per87  energy function perim87.value^2 modulus 0
+quantity ten87  energy function 1.000000*perim87.value modulus 0
+
+method_instance ar88 method edge_area
+quantity sq_farea88 energy function ar88.value^2
+quantity farea88 energy function -2 * 1.000000 * abs(ar88.value)
+method_instance perim88 method edge_length
+quantity per88  energy function perim88.value^2 modulus 0
+quantity ten88  energy function 1.000000*perim88.value modulus 0
+
+method_instance ar89 method edge_area
+quantity sq_farea89 energy function ar89.value^2
+quantity farea89 energy function -2 * 1.000000 * abs(ar89.value)
+method_instance perim89 method edge_length
+quantity per89  energy function perim89.value^2 modulus 0
+quantity ten89  energy function 1.000000*perim89.value modulus 0
+
+method_instance ar90 method edge_area
+quantity sq_farea90 energy function ar90.value^2
+quantity farea90 energy function -2 * 1.000000 * abs(ar90.value)
+method_instance perim90 method edge_length
+quantity per90  energy function perim90.value^2 modulus 0
+quantity ten90  energy function 1.000000*perim90.value modulus 0
+
+method_instance ar91 method edge_area
+quantity sq_farea91 energy function ar91.value^2
+quantity farea91 energy function -2 * 1.000000 * abs(ar91.value)
+method_instance perim91 method edge_length
+quantity per91  energy function perim91.value^2 modulus 0
+quantity ten91  energy function 1.000000*perim91.value modulus 0
+
+method_instance ar92 method edge_area
+quantity sq_farea92 energy function ar92.value^2
+quantity farea92 energy function -2 * 1.000000 * abs(ar92.value)
+method_instance perim92 method edge_length
+quantity per92  energy function perim92.value^2 modulus 0
+quantity ten92  energy function 1.000000*perim92.value modulus 0
+
+method_instance ar93 method edge_area
+quantity sq_farea93 energy function ar93.value^2
+quantity farea93 energy function -2 * 1.000000 * abs(ar93.value)
+method_instance perim93 method edge_length
+quantity per93  energy function perim93.value^2 modulus 0
+quantity ten93  energy function 1.000000*perim93.value modulus 0
+
+method_instance ar94 method edge_area
+quantity sq_farea94 energy function ar94.value^2
+quantity farea94 energy function -2 * 1.000000 * abs(ar94.value)
+method_instance perim94 method edge_length
+quantity per94  energy function perim94.value^2 modulus 0
+quantity ten94  energy function 1.000000*perim94.value modulus 0
+
+method_instance ar95 method edge_area
+quantity sq_farea95 energy function ar95.value^2
+quantity farea95 energy function -2 * 1.000000 * abs(ar95.value)
+method_instance perim95 method edge_length
+quantity per95  energy function perim95.value^2 modulus 0
+quantity ten95  energy function 1.000000*perim95.value modulus 0
+
+method_instance ar96 method edge_area
+quantity sq_farea96 energy function ar96.value^2
+quantity farea96 energy function -2 * 1.000000 * abs(ar96.value)
+method_instance perim96 method edge_length
+quantity per96  energy function perim96.value^2 modulus 0
+quantity ten96  energy function 1.000000*perim96.value modulus 0
+
+method_instance ar97 method edge_area
+quantity sq_farea97 energy function ar97.value^2
+quantity farea97 energy function -2 * 1.000000 * abs(ar97.value)
+method_instance perim97 method edge_length
+quantity per97  energy function perim97.value^2 modulus 0
+quantity ten97  energy function 1.000000*perim97.value modulus 0
+
+method_instance ar98 method edge_area
+quantity sq_farea98 energy function ar98.value^2
+quantity farea98 energy function -2 * 1.000000 * abs(ar98.value)
+method_instance perim98 method edge_length
+quantity per98  energy function perim98.value^2 modulus 0
+quantity ten98  energy function 1.000000*perim98.value modulus 0
+
+method_instance ar99 method edge_area
+quantity sq_farea99 energy function ar99.value^2
+quantity farea99 energy function -2 * 1.000000 * abs(ar99.value)
+method_instance perim99 method edge_length
+quantity per99  energy function perim99.value^2 modulus 0
+quantity ten99  energy function 1.000000*perim99.value modulus 0
+
+method_instance ar100 method edge_area
+quantity sq_farea100 energy function ar100.value^2
+quantity farea100 energy function -2 * 1.000000 * abs(ar100.value)
+method_instance perim100 method edge_length
+quantity per100  energy function perim100.value^2 modulus 0
+quantity ten100  energy function 1.000000*perim100.value modulus 0
+
+method_instance ar101 method edge_area
+quantity sq_farea101 energy function ar101.value^2
+quantity farea101 energy function -2 * 1.000000 * abs(ar101.value)
+method_instance perim101 method edge_length
+quantity per101  energy function perim101.value^2 modulus 0
+quantity ten101  energy function 1.000000*perim101.value modulus 0
+
+method_instance ar102 method edge_area
+quantity sq_farea102 energy function ar102.value^2
+quantity farea102 energy function -2 * 1.000000 * abs(ar102.value)
+method_instance perim102 method edge_length
+quantity per102  energy function perim102.value^2 modulus 0
+quantity ten102  energy function 1.000000*perim102.value modulus 0
+
+method_instance ar103 method edge_area
+quantity sq_farea103 energy function ar103.value^2
+quantity farea103 energy function -2 * 1.000000 * abs(ar103.value)
+method_instance perim103 method edge_length
+quantity per103  energy function perim103.value^2 modulus 0
+quantity ten103  energy function 1.000000*perim103.value modulus 0
+
+method_instance ar104 method edge_area
+quantity sq_farea104 energy function ar104.value^2
+quantity farea104 energy function -2 * 1.000000 * abs(ar104.value)
+method_instance perim104 method edge_length
+quantity per104  energy function perim104.value^2 modulus 0
+quantity ten104  energy function 1.000000*perim104.value modulus 0
+
+method_instance ar105 method edge_area
+quantity sq_farea105 energy function ar105.value^2
+quantity farea105 energy function -2 * 1.000000 * abs(ar105.value)
+method_instance perim105 method edge_length
+quantity per105  energy function perim105.value^2 modulus 0
+quantity ten105  energy function 1.000000*perim105.value modulus 0
+
+method_instance ar106 method edge_area
+quantity sq_farea106 energy function ar106.value^2
+quantity farea106 energy function -2 * 1.000000 * abs(ar106.value)
+method_instance perim106 method edge_length
+quantity per106  energy function perim106.value^2 modulus 0
+quantity ten106  energy function 1.000000*perim106.value modulus 0
+
+method_instance ar107 method edge_area
+quantity sq_farea107 energy function ar107.value^2
+quantity farea107 energy function -2 * 1.000000 * abs(ar107.value)
+method_instance perim107 method edge_length
+quantity per107  energy function perim107.value^2 modulus 0
+quantity ten107  energy function 1.000000*perim107.value modulus 0
+
+method_instance ar108 method edge_area
+quantity sq_farea108 energy function ar108.value^2
+quantity farea108 energy function -2 * 1.000000 * abs(ar108.value)
+method_instance perim108 method edge_length
+quantity per108  energy function perim108.value^2 modulus 0
+quantity ten108  energy function 1.000000*perim108.value modulus 0
+
+method_instance ar109 method edge_area
+quantity sq_farea109 energy function ar109.value^2
+quantity farea109 energy function -2 * 1.000000 * abs(ar109.value)
+method_instance perim109 method edge_length
+quantity per109  energy function perim109.value^2 modulus 0
+quantity ten109  energy function 1.000000*perim109.value modulus 0
+
+method_instance ar110 method edge_area
+quantity sq_farea110 energy function ar110.value^2
+quantity farea110 energy function -2 * 1.000000 * abs(ar110.value)
+method_instance perim110 method edge_length
+quantity per110  energy function perim110.value^2 modulus 0
+quantity ten110  energy function 1.000000*perim110.value modulus 0
+
+method_instance ar111 method edge_area
+quantity sq_farea111 energy function ar111.value^2
+quantity farea111 energy function -2 * 1.000000 * abs(ar111.value)
+method_instance perim111 method edge_length
+quantity per111  energy function perim111.value^2 modulus 0
+quantity ten111  energy function 1.000000*perim111.value modulus 0
+
+method_instance ar112 method edge_area
+quantity sq_farea112 energy function ar112.value^2
+quantity farea112 energy function -2 * 1.000000 * abs(ar112.value)
+method_instance perim112 method edge_length
+quantity per112  energy function perim112.value^2 modulus 0
+quantity ten112  energy function 1.000000*perim112.value modulus 0
+
+method_instance ar113 method edge_area
+quantity sq_farea113 energy function ar113.value^2
+quantity farea113 energy function -2 * 1.000000 * abs(ar113.value)
+method_instance perim113 method edge_length
+quantity per113  energy function perim113.value^2 modulus 0
+quantity ten113  energy function 1.000000*perim113.value modulus 0
+
+method_instance ar114 method edge_area
+quantity sq_farea114 energy function ar114.value^2
+quantity farea114 energy function -2 * 1.000000 * abs(ar114.value)
+method_instance perim114 method edge_length
+quantity per114  energy function perim114.value^2 modulus 0
+quantity ten114  energy function 1.000000*perim114.value modulus 0
+
+method_instance ar115 method edge_area
+quantity sq_farea115 energy function ar115.value^2
+quantity farea115 energy function -2 * 1.000000 * abs(ar115.value)
+method_instance perim115 method edge_length
+quantity per115  energy function perim115.value^2 modulus 0
+quantity ten115  energy function 1.000000*perim115.value modulus 0
+
+method_instance ar116 method edge_area
+quantity sq_farea116 energy function ar116.value^2
+quantity farea116 energy function -2 * 1.000000 * abs(ar116.value)
+method_instance perim116 method edge_length
+quantity per116  energy function perim116.value^2 modulus 0
+quantity ten116  energy function 1.000000*perim116.value modulus 0
+
+method_instance ar117 method edge_area
+quantity sq_farea117 energy function ar117.value^2
+quantity farea117 energy function -2 * 1.000000 * abs(ar117.value)
+method_instance perim117 method edge_length
+quantity per117  energy function perim117.value^2 modulus 0
+quantity ten117  energy function 1.000000*perim117.value modulus 0
+
+method_instance ar118 method edge_area
+quantity sq_farea118 energy function ar118.value^2
+quantity farea118 energy function -2 * 1.000000 * abs(ar118.value)
+method_instance perim118 method edge_length
+quantity per118  energy function perim118.value^2 modulus 0
+quantity ten118  energy function 1.000000*perim118.value modulus 0
+
+method_instance ar119 method edge_area
+quantity sq_farea119 energy function ar119.value^2
+quantity farea119 energy function -2 * 1.000000 * abs(ar119.value)
+method_instance perim119 method edge_length
+quantity per119  energy function perim119.value^2 modulus 0
+quantity ten119  energy function 1.000000*perim119.value modulus 0
+
+method_instance ar120 method edge_area
+quantity sq_farea120 energy function ar120.value^2
+quantity farea120 energy function -2 * 1.000000 * abs(ar120.value)
+method_instance perim120 method edge_length
+quantity per120  energy function perim120.value^2 modulus 0
+quantity ten120  energy function 1.000000*perim120.value modulus 0
+
+method_instance ar121 method edge_area
+quantity sq_farea121 energy function ar121.value^2
+quantity farea121 energy function -2 * 1.000000 * abs(ar121.value)
+method_instance perim121 method edge_length
+quantity per121  energy function perim121.value^2 modulus 0
+quantity ten121  energy function 1.000000*perim121.value modulus 0
+
+method_instance ar122 method edge_area
+quantity sq_farea122 energy function ar122.value^2
+quantity farea122 energy function -2 * 1.000000 * abs(ar122.value)
+method_instance perim122 method edge_length
+quantity per122  energy function perim122.value^2 modulus 0
+quantity ten122  energy function 1.000000*perim122.value modulus 0
+
+method_instance ar123 method edge_area
+quantity sq_farea123 energy function ar123.value^2
+quantity farea123 energy function -2 * 1.000000 * abs(ar123.value)
+method_instance perim123 method edge_length
+quantity per123  energy function perim123.value^2 modulus 0
+quantity ten123  energy function 1.000000*perim123.value modulus 0
+
+method_instance ar124 method edge_area
+quantity sq_farea124 energy function ar124.value^2
+quantity farea124 energy function -2 * 1.000000 * abs(ar124.value)
+method_instance perim124 method edge_length
+quantity per124  energy function perim124.value^2 modulus 0
+quantity ten124  energy function 1.000000*perim124.value modulus 0
+
+method_instance ar125 method edge_area
+quantity sq_farea125 energy function ar125.value^2
+quantity farea125 energy function -2 * 1.000000 * abs(ar125.value)
+method_instance perim125 method edge_length
+quantity per125  energy function perim125.value^2 modulus 0
+quantity ten125  energy function 1.000000*perim125.value modulus 0
+
+method_instance ar126 method edge_area
+quantity sq_farea126 energy function ar126.value^2
+quantity farea126 energy function -2 * 1.000000 * abs(ar126.value)
+method_instance perim126 method edge_length
+quantity per126  energy function perim126.value^2 modulus 0
+quantity ten126  energy function 1.000000*perim126.value modulus 0
+
+method_instance ar127 method edge_area
+quantity sq_farea127 energy function ar127.value^2
+quantity farea127 energy function -2 * 1.000000 * abs(ar127.value)
+method_instance perim127 method edge_length
+quantity per127  energy function perim127.value^2 modulus 0
+quantity ten127  energy function 1.000000*perim127.value modulus 0
+
+method_instance ar128 method edge_area
+quantity sq_farea128 energy function ar128.value^2
+quantity farea128 energy function -2 * 1.000000 * abs(ar128.value)
+method_instance perim128 method edge_length
+quantity per128  energy function perim128.value^2 modulus 0
+quantity ten128  energy function 1.000000*perim128.value modulus 0
+
+method_instance ar129 method edge_area
+quantity sq_farea129 energy function ar129.value^2
+quantity farea129 energy function -2 * 1.000000 * abs(ar129.value)
+method_instance perim129 method edge_length
+quantity per129  energy function perim129.value^2 modulus 0
+quantity ten129  energy function 1.000000*perim129.value modulus 0
+
+method_instance ar130 method edge_area
+quantity sq_farea130 energy function ar130.value^2
+quantity farea130 energy function -2 * 1.000000 * abs(ar130.value)
+method_instance perim130 method edge_length
+quantity per130  energy function perim130.value^2 modulus 0
+quantity ten130  energy function 1.000000*perim130.value modulus 0
+
+method_instance ar131 method edge_area
+quantity sq_farea131 energy function ar131.value^2
+quantity farea131 energy function -2 * 1.000000 * abs(ar131.value)
+method_instance perim131 method edge_length
+quantity per131  energy function perim131.value^2 modulus 0
+quantity ten131  energy function 1.000000*perim131.value modulus 0
+
+method_instance ar132 method edge_area
+quantity sq_farea132 energy function ar132.value^2
+quantity farea132 energy function -2 * 1.000000 * abs(ar132.value)
+method_instance perim132 method edge_length
+quantity per132  energy function perim132.value^2 modulus 0
+quantity ten132  energy function 1.000000*perim132.value modulus 0
+
+method_instance ar133 method edge_area
+quantity sq_farea133 energy function ar133.value^2
+quantity farea133 energy function -2 * 1.000000 * abs(ar133.value)
+method_instance perim133 method edge_length
+quantity per133  energy function perim133.value^2 modulus 0
+quantity ten133  energy function 1.000000*perim133.value modulus 0
+
+method_instance ar134 method edge_area
+quantity sq_farea134 energy function ar134.value^2
+quantity farea134 energy function -2 * 1.000000 * abs(ar134.value)
+method_instance perim134 method edge_length
+quantity per134  energy function perim134.value^2 modulus 0
+quantity ten134  energy function 1.000000*perim134.value modulus 0
+
+method_instance ar135 method edge_area
+quantity sq_farea135 energy function ar135.value^2
+quantity farea135 energy function -2 * 1.000000 * abs(ar135.value)
+method_instance perim135 method edge_length
+quantity per135  energy function perim135.value^2 modulus 0
+quantity ten135  energy function 1.000000*perim135.value modulus 0
+
+method_instance ar136 method edge_area
+quantity sq_farea136 energy function ar136.value^2
+quantity farea136 energy function -2 * 1.000000 * abs(ar136.value)
+method_instance perim136 method edge_length
+quantity per136  energy function perim136.value^2 modulus 0
+quantity ten136  energy function 1.000000*perim136.value modulus 0
+
+method_instance ar137 method edge_area
+quantity sq_farea137 energy function ar137.value^2
+quantity farea137 energy function -2 * 1.000000 * abs(ar137.value)
+method_instance perim137 method edge_length
+quantity per137  energy function perim137.value^2 modulus 0
+quantity ten137  energy function 1.000000*perim137.value modulus 0
+
+method_instance ar138 method edge_area
+quantity sq_farea138 energy function ar138.value^2
+quantity farea138 energy function -2 * 1.000000 * abs(ar138.value)
+method_instance perim138 method edge_length
+quantity per138  energy function perim138.value^2 modulus 0
+quantity ten138  energy function 1.000000*perim138.value modulus 0
+
+method_instance ar139 method edge_area
+quantity sq_farea139 energy function ar139.value^2
+quantity farea139 energy function -2 * 1.000000 * abs(ar139.value)
+method_instance perim139 method edge_length
+quantity per139  energy function perim139.value^2 modulus 0
+quantity ten139  energy function 1.000000*perim139.value modulus 0
+
+method_instance ar140 method edge_area
+quantity sq_farea140 energy function ar140.value^2
+quantity farea140 energy function -2 * 1.000000 * abs(ar140.value)
+method_instance perim140 method edge_length
+quantity per140  energy function perim140.value^2 modulus 0
+quantity ten140  energy function 1.000000*perim140.value modulus 0
+
+method_instance ar141 method edge_area
+quantity sq_farea141 energy function ar141.value^2
+quantity farea141 energy function -2 * 1.000000 * abs(ar141.value)
+method_instance perim141 method edge_length
+quantity per141  energy function perim141.value^2 modulus 0
+quantity ten141  energy function 1.000000*perim141.value modulus 0
+
+method_instance ar142 method edge_area
+quantity sq_farea142 energy function ar142.value^2
+quantity farea142 energy function -2 * 1.000000 * abs(ar142.value)
+method_instance perim142 method edge_length
+quantity per142  energy function perim142.value^2 modulus 0
+quantity ten142  energy function 1.000000*perim142.value modulus 0
+
+method_instance ar143 method edge_area
+quantity sq_farea143 energy function ar143.value^2
+quantity farea143 energy function -2 * 1.000000 * abs(ar143.value)
+method_instance perim143 method edge_length
+quantity per143  energy function perim143.value^2 modulus 0
+quantity ten143  energy function 1.000000*perim143.value modulus 0
+
+method_instance ar144 method edge_area
+quantity sq_farea144 energy function ar144.value^2
+quantity farea144 energy function -2 * 1.000000 * abs(ar144.value)
+method_instance perim144 method edge_length
+quantity per144  energy function perim144.value^2 modulus 0
+quantity ten144  energy function 1.000000*perim144.value modulus 0
+
+method_instance ar145 method edge_area
+quantity sq_farea145 energy function ar145.value^2
+quantity farea145 energy function -2 * 1.000000 * abs(ar145.value)
+method_instance perim145 method edge_length
+quantity per145  energy function perim145.value^2 modulus 0
+quantity ten145  energy function 1.000000*perim145.value modulus 0
+
+method_instance ar146 method edge_area
+quantity sq_farea146 energy function ar146.value^2
+quantity farea146 energy function -2 * 1.000000 * abs(ar146.value)
+method_instance perim146 method edge_length
+quantity per146  energy function perim146.value^2 modulus 0
+quantity ten146  energy function 1.000000*perim146.value modulus 0
+
+method_instance ar147 method edge_area
+quantity sq_farea147 energy function ar147.value^2
+quantity farea147 energy function -2 * 1.000000 * abs(ar147.value)
+method_instance perim147 method edge_length
+quantity per147  energy function perim147.value^2 modulus 0
+quantity ten147  energy function 1.000000*perim147.value modulus 0
+
+method_instance ar148 method edge_area
+quantity sq_farea148 energy function ar148.value^2
+quantity farea148 energy function -2 * 1.000000 * abs(ar148.value)
+method_instance perim148 method edge_length
+quantity per148  energy function perim148.value^2 modulus 0
+quantity ten148  energy function 1.000000*perim148.value modulus 0
+
+method_instance ar149 method edge_area
+quantity sq_farea149 energy function ar149.value^2
+quantity farea149 energy function -2 * 1.000000 * abs(ar149.value)
+method_instance perim149 method edge_length
+quantity per149  energy function perim149.value^2 modulus 0
+quantity ten149  energy function 1.000000*perim149.value modulus 0
+
+method_instance ar150 method edge_area
+quantity sq_farea150 energy function ar150.value^2
+quantity farea150 energy function -2 * 1.000000 * abs(ar150.value)
+method_instance perim150 method edge_length
+quantity per150  energy function perim150.value^2 modulus 0
+quantity ten150  energy function 1.000000*perim150.value modulus 0
+
+method_instance ar151 method edge_area
+quantity sq_farea151 energy function ar151.value^2
+quantity farea151 energy function -2 * 1.000000 * abs(ar151.value)
+method_instance perim151 method edge_length
+quantity per151  energy function perim151.value^2 modulus 0
+quantity ten151  energy function 1.000000*perim151.value modulus 0
+
+method_instance ar152 method edge_area
+quantity sq_farea152 energy function ar152.value^2
+quantity farea152 energy function -2 * 1.000000 * abs(ar152.value)
+method_instance perim152 method edge_length
+quantity per152  energy function perim152.value^2 modulus 0
+quantity ten152  energy function 1.000000*perim152.value modulus 0
+
+method_instance ar153 method edge_area
+quantity sq_farea153 energy function ar153.value^2
+quantity farea153 energy function -2 * 1.000000 * abs(ar153.value)
+method_instance perim153 method edge_length
+quantity per153  energy function perim153.value^2 modulus 0
+quantity ten153  energy function 1.000000*perim153.value modulus 0
+
+method_instance ar154 method edge_area
+quantity sq_farea154 energy function ar154.value^2
+quantity farea154 energy function -2 * 1.000000 * abs(ar154.value)
+method_instance perim154 method edge_length
+quantity per154  energy function perim154.value^2 modulus 0
+quantity ten154  energy function 1.000000*perim154.value modulus 0
+
+method_instance ar155 method edge_area
+quantity sq_farea155 energy function ar155.value^2
+quantity farea155 energy function -2 * 1.000000 * abs(ar155.value)
+method_instance perim155 method edge_length
+quantity per155  energy function perim155.value^2 modulus 0
+quantity ten155  energy function 1.000000*perim155.value modulus 0
+
+method_instance ar156 method edge_area
+quantity sq_farea156 energy function ar156.value^2
+quantity farea156 energy function -2 * 1.000000 * abs(ar156.value)
+method_instance perim156 method edge_length
+quantity per156  energy function perim156.value^2 modulus 0
+quantity ten156  energy function 1.000000*perim156.value modulus 0
+
+method_instance ar157 method edge_area
+quantity sq_farea157 energy function ar157.value^2
+quantity farea157 energy function -2 * 1.000000 * abs(ar157.value)
+method_instance perim157 method edge_length
+quantity per157  energy function perim157.value^2 modulus 0
+quantity ten157  energy function 1.000000*perim157.value modulus 0
+
+method_instance ar158 method edge_area
+quantity sq_farea158 energy function ar158.value^2
+quantity farea158 energy function -2 * 1.000000 * abs(ar158.value)
+method_instance perim158 method edge_length
+quantity per158  energy function perim158.value^2 modulus 0
+quantity ten158  energy function 1.000000*perim158.value modulus 0
+
+method_instance ar159 method edge_area
+quantity sq_farea159 energy function ar159.value^2
+quantity farea159 energy function -2 * 1.000000 * abs(ar159.value)
+method_instance perim159 method edge_length
+quantity per159  energy function perim159.value^2 modulus 0
+quantity ten159  energy function 1.000000*perim159.value modulus 0
+
+method_instance ar160 method edge_area
+quantity sq_farea160 energy function ar160.value^2
+quantity farea160 energy function -2 * 1.000000 * abs(ar160.value)
+method_instance perim160 method edge_length
+quantity per160  energy function perim160.value^2 modulus 0
+quantity ten160  energy function 1.000000*perim160.value modulus 0
+
+method_instance ar161 method edge_area
+quantity sq_farea161 energy function ar161.value^2
+quantity farea161 energy function -2 * 1.000000 * abs(ar161.value)
+method_instance perim161 method edge_length
+quantity per161  energy function perim161.value^2 modulus 0
+quantity ten161  energy function 1.000000*perim161.value modulus 0
+
+method_instance ar162 method edge_area
+quantity sq_farea162 energy function ar162.value^2
+quantity farea162 energy function -2 * 1.000000 * abs(ar162.value)
+method_instance perim162 method edge_length
+quantity per162  energy function perim162.value^2 modulus 0
+quantity ten162  energy function 1.000000*perim162.value modulus 0
+
+method_instance ar163 method edge_area
+quantity sq_farea163 energy function ar163.value^2
+quantity farea163 energy function -2 * 1.000000 * abs(ar163.value)
+method_instance perim163 method edge_length
+quantity per163  energy function perim163.value^2 modulus 0
+quantity ten163  energy function 1.000000*perim163.value modulus 0
+
+method_instance ar164 method edge_area
+quantity sq_farea164 energy function ar164.value^2
+quantity farea164 energy function -2 * 1.000000 * abs(ar164.value)
+method_instance perim164 method edge_length
+quantity per164  energy function perim164.value^2 modulus 0
+quantity ten164  energy function 1.000000*perim164.value modulus 0
+
+method_instance ar165 method edge_area
+quantity sq_farea165 energy function ar165.value^2
+quantity farea165 energy function -2 * 1.000000 * abs(ar165.value)
+method_instance perim165 method edge_length
+quantity per165  energy function perim165.value^2 modulus 0
+quantity ten165  energy function 1.000000*perim165.value modulus 0
+
+method_instance ar166 method edge_area
+quantity sq_farea166 energy function ar166.value^2
+quantity farea166 energy function -2 * 1.000000 * abs(ar166.value)
+method_instance perim166 method edge_length
+quantity per166  energy function perim166.value^2 modulus 0
+quantity ten166  energy function 1.000000*perim166.value modulus 0
+
+method_instance ar167 method edge_area
+quantity sq_farea167 energy function ar167.value^2
+quantity farea167 energy function -2 * 1.000000 * abs(ar167.value)
+method_instance perim167 method edge_length
+quantity per167  energy function perim167.value^2 modulus 0
+quantity ten167  energy function 1.000000*perim167.value modulus 0
+
+method_instance ar168 method edge_area
+quantity sq_farea168 energy function ar168.value^2
+quantity farea168 energy function -2 * 1.000000 * abs(ar168.value)
+method_instance perim168 method edge_length
+quantity per168  energy function perim168.value^2 modulus 0
+quantity ten168  energy function 1.000000*perim168.value modulus 0
+
+method_instance ar169 method edge_area
+quantity sq_farea169 energy function ar169.value^2
+quantity farea169 energy function -2 * 1.000000 * abs(ar169.value)
+method_instance perim169 method edge_length
+quantity per169  energy function perim169.value^2 modulus 0
+quantity ten169  energy function 1.000000*perim169.value modulus 0
+
+method_instance ar170 method edge_area
+quantity sq_farea170 energy function ar170.value^2
+quantity farea170 energy function -2 * 1.000000 * abs(ar170.value)
+method_instance perim170 method edge_length
+quantity per170  energy function perim170.value^2 modulus 0
+quantity ten170  energy function 1.000000*perim170.value modulus 0
+
+method_instance ar171 method edge_area
+quantity sq_farea171 energy function ar171.value^2
+quantity farea171 energy function -2 * 1.000000 * abs(ar171.value)
+method_instance perim171 method edge_length
+quantity per171  energy function perim171.value^2 modulus 0
+quantity ten171  energy function 1.000000*perim171.value modulus 0
+
+method_instance ar172 method edge_area
+quantity sq_farea172 energy function ar172.value^2
+quantity farea172 energy function -2 * 1.000000 * abs(ar172.value)
+method_instance perim172 method edge_length
+quantity per172  energy function perim172.value^2 modulus 0
+quantity ten172  energy function 1.000000*perim172.value modulus 0
+
+method_instance ar173 method edge_area
+quantity sq_farea173 energy function ar173.value^2
+quantity farea173 energy function -2 * 1.000000 * abs(ar173.value)
+method_instance perim173 method edge_length
+quantity per173  energy function perim173.value^2 modulus 0
+quantity ten173  energy function 1.000000*perim173.value modulus 0
+
+method_instance ar174 method edge_area
+quantity sq_farea174 energy function ar174.value^2
+quantity farea174 energy function -2 * 1.000000 * abs(ar174.value)
+method_instance perim174 method edge_length
+quantity per174  energy function perim174.value^2 modulus 0
+quantity ten174  energy function 1.000000*perim174.value modulus 0
+
+method_instance ar175 method edge_area
+quantity sq_farea175 energy function ar175.value^2
+quantity farea175 energy function -2 * 1.000000 * abs(ar175.value)
+method_instance perim175 method edge_length
+quantity per175  energy function perim175.value^2 modulus 0
+quantity ten175  energy function 1.000000*perim175.value modulus 0
+
+method_instance ar176 method edge_area
+quantity sq_farea176 energy function ar176.value^2
+quantity farea176 energy function -2 * 1.000000 * abs(ar176.value)
+method_instance perim176 method edge_length
+quantity per176  energy function perim176.value^2 modulus 0
+quantity ten176  energy function 1.000000*perim176.value modulus 0
+
+method_instance ar177 method edge_area
+quantity sq_farea177 energy function ar177.value^2
+quantity farea177 energy function -2 * 1.000000 * abs(ar177.value)
+method_instance perim177 method edge_length
+quantity per177  energy function perim177.value^2 modulus 0
+quantity ten177  energy function 1.000000*perim177.value modulus 0
+
+method_instance ar178 method edge_area
+quantity sq_farea178 energy function ar178.value^2
+quantity farea178 energy function -2 * 1.000000 * abs(ar178.value)
+method_instance perim178 method edge_length
+quantity per178  energy function perim178.value^2 modulus 0
+quantity ten178  energy function 1.000000*perim178.value modulus 0
+
+method_instance ar179 method edge_area
+quantity sq_farea179 energy function ar179.value^2
+quantity farea179 energy function -2 * 1.000000 * abs(ar179.value)
+method_instance perim179 method edge_length
+quantity per179  energy function perim179.value^2 modulus 0
+quantity ten179  energy function 1.000000*perim179.value modulus 0
+
+method_instance ar180 method edge_area
+quantity sq_farea180 energy function ar180.value^2
+quantity farea180 energy function -2 * 1.000000 * abs(ar180.value)
+method_instance perim180 method edge_length
+quantity per180  energy function perim180.value^2 modulus 0
+quantity ten180  energy function 1.000000*perim180.value modulus 0
+
+method_instance ar181 method edge_area
+quantity sq_farea181 energy function ar181.value^2
+quantity farea181 energy function -2 * 1.000000 * abs(ar181.value)
+method_instance perim181 method edge_length
+quantity per181  energy function perim181.value^2 modulus 0
+quantity ten181  energy function 1.000000*perim181.value modulus 0
+
+method_instance ar182 method edge_area
+quantity sq_farea182 energy function ar182.value^2
+quantity farea182 energy function -2 * 1.000000 * abs(ar182.value)
+method_instance perim182 method edge_length
+quantity per182  energy function perim182.value^2 modulus 0
+quantity ten182  energy function 1.000000*perim182.value modulus 0
+
+method_instance ar183 method edge_area
+quantity sq_farea183 energy function ar183.value^2
+quantity farea183 energy function -2 * 1.000000 * abs(ar183.value)
+method_instance perim183 method edge_length
+quantity per183  energy function perim183.value^2 modulus 0
+quantity ten183  energy function 1.000000*perim183.value modulus 0
+
+method_instance ar184 method edge_area
+quantity sq_farea184 energy function ar184.value^2
+quantity farea184 energy function -2 * 1.000000 * abs(ar184.value)
+method_instance perim184 method edge_length
+quantity per184  energy function perim184.value^2 modulus 0
+quantity ten184  energy function 1.000000*perim184.value modulus 0
+
+method_instance ar185 method edge_area
+quantity sq_farea185 energy function ar185.value^2
+quantity farea185 energy function -2 * 1.000000 * abs(ar185.value)
+method_instance perim185 method edge_length
+quantity per185  energy function perim185.value^2 modulus 0
+quantity ten185  energy function 1.000000*perim185.value modulus 0
+
+method_instance ar186 method edge_area
+quantity sq_farea186 energy function ar186.value^2
+quantity farea186 energy function -2 * 1.000000 * abs(ar186.value)
+method_instance perim186 method edge_length
+quantity per186  energy function perim186.value^2 modulus 0
+quantity ten186  energy function 1.000000*perim186.value modulus 0
+
+method_instance ar187 method edge_area
+quantity sq_farea187 energy function ar187.value^2
+quantity farea187 energy function -2 * 1.000000 * abs(ar187.value)
+method_instance perim187 method edge_length
+quantity per187  energy function perim187.value^2 modulus 0
+quantity ten187  energy function 1.000000*perim187.value modulus 0
+
+method_instance ar188 method edge_area
+quantity sq_farea188 energy function ar188.value^2
+quantity farea188 energy function -2 * 1.000000 * abs(ar188.value)
+method_instance perim188 method edge_length
+quantity per188  energy function perim188.value^2 modulus 0
+quantity ten188  energy function 1.000000*perim188.value modulus 0
+
+method_instance ar189 method edge_area
+quantity sq_farea189 energy function ar189.value^2
+quantity farea189 energy function -2 * 1.000000 * abs(ar189.value)
+method_instance perim189 method edge_length
+quantity per189  energy function perim189.value^2 modulus 0
+quantity ten189  energy function 1.000000*perim189.value modulus 0
+
+method_instance ar190 method edge_area
+quantity sq_farea190 energy function ar190.value^2
+quantity farea190 energy function -2 * 1.000000 * abs(ar190.value)
+method_instance perim190 method edge_length
+quantity per190  energy function perim190.value^2 modulus 0
+quantity ten190  energy function 1.000000*perim190.value modulus 0
+
+method_instance ar191 method edge_area
+quantity sq_farea191 energy function ar191.value^2
+quantity farea191 energy function -2 * 1.000000 * abs(ar191.value)
+method_instance perim191 method edge_length
+quantity per191  energy function perim191.value^2 modulus 0
+quantity ten191  energy function 1.000000*perim191.value modulus 0
+
+method_instance ar192 method edge_area
+quantity sq_farea192 energy function ar192.value^2
+quantity farea192 energy function -2 * 1.000000 * abs(ar192.value)
+method_instance perim192 method edge_length
+quantity per192  energy function perim192.value^2 modulus 0
+quantity ten192  energy function 1.000000*perim192.value modulus 0
+
+method_instance ar193 method edge_area
+quantity sq_farea193 energy function ar193.value^2
+quantity farea193 energy function -2 * 1.000000 * abs(ar193.value)
+method_instance perim193 method edge_length
+quantity per193  energy function perim193.value^2 modulus 0
+quantity ten193  energy function 1.000000*perim193.value modulus 0
+
+method_instance ar194 method edge_area
+quantity sq_farea194 energy function ar194.value^2
+quantity farea194 energy function -2 * 1.000000 * abs(ar194.value)
+method_instance perim194 method edge_length
+quantity per194  energy function perim194.value^2 modulus 0
+quantity ten194  energy function 1.000000*perim194.value modulus 0
+
+method_instance ar195 method edge_area
+quantity sq_farea195 energy function ar195.value^2
+quantity farea195 energy function -2 * 1.000000 * abs(ar195.value)
+method_instance perim195 method edge_length
+quantity per195  energy function perim195.value^2 modulus 0
+quantity ten195  energy function 1.000000*perim195.value modulus 0
+
+method_instance ar196 method edge_area
+quantity sq_farea196 energy function ar196.value^2
+quantity farea196 energy function -2 * 1.000000 * abs(ar196.value)
+method_instance perim196 method edge_length
+quantity per196  energy function perim196.value^2 modulus 0
+quantity ten196  energy function 1.000000*perim196.value modulus 0
+
+method_instance ar197 method edge_area
+quantity sq_farea197 energy function ar197.value^2
+quantity farea197 energy function -2 * 1.000000 * abs(ar197.value)
+method_instance perim197 method edge_length
+quantity per197  energy function perim197.value^2 modulus 0
+quantity ten197  energy function 1.000000*perim197.value modulus 0
+
+method_instance ar198 method edge_area
+quantity sq_farea198 energy function ar198.value^2
+quantity farea198 energy function -2 * 1.000000 * abs(ar198.value)
+method_instance perim198 method edge_length
+quantity per198  energy function perim198.value^2 modulus 0
+quantity ten198  energy function 1.000000*perim198.value modulus 0
+
+method_instance ar199 method edge_area
+quantity sq_farea199 energy function ar199.value^2
+quantity farea199 energy function -2 * 1.000000 * abs(ar199.value)
+method_instance perim199 method edge_length
+quantity per199  energy function perim199.value^2 modulus 0
+quantity ten199  energy function 1.000000*perim199.value modulus 0
+
+method_instance ar200 method edge_area
+quantity sq_farea200 energy function ar200.value^2
+quantity farea200 energy function -2 * 1.000000 * abs(ar200.value)
+method_instance perim200 method edge_length
+quantity per200  energy function perim200.value^2 modulus 0
+quantity ten200  energy function 1.000000*perim200.value modulus 0
+
+method_instance ar201 method edge_area
+quantity sq_farea201 energy function ar201.value^2
+quantity farea201 energy function -2 * 1.000000 * abs(ar201.value)
+method_instance perim201 method edge_length
+quantity per201  energy function perim201.value^2 modulus 0
+quantity ten201  energy function 1.000000*perim201.value modulus 0
+
+method_instance ar202 method edge_area
+quantity sq_farea202 energy function ar202.value^2
+quantity farea202 energy function -2 * 1.000000 * abs(ar202.value)
+method_instance perim202 method edge_length
+quantity per202  energy function perim202.value^2 modulus 0
+quantity ten202  energy function 1.000000*perim202.value modulus 0
+
+method_instance ar203 method edge_area
+quantity sq_farea203 energy function ar203.value^2
+quantity farea203 energy function -2 * 1.000000 * abs(ar203.value)
+method_instance perim203 method edge_length
+quantity per203  energy function perim203.value^2 modulus 0
+quantity ten203  energy function 1.000000*perim203.value modulus 0
+
+method_instance ar204 method edge_area
+quantity sq_farea204 energy function ar204.value^2
+quantity farea204 energy function -2 * 1.000000 * abs(ar204.value)
+method_instance perim204 method edge_length
+quantity per204  energy function perim204.value^2 modulus 0
+quantity ten204  energy function 1.000000*perim204.value modulus 0
+
+method_instance ar205 method edge_area
+quantity sq_farea205 energy function ar205.value^2
+quantity farea205 energy function -2 * 1.000000 * abs(ar205.value)
+method_instance perim205 method edge_length
+quantity per205  energy function perim205.value^2 modulus 0
+quantity ten205  energy function 1.000000*perim205.value modulus 0
+
+method_instance ar206 method edge_area
+quantity sq_farea206 energy function ar206.value^2
+quantity farea206 energy function -2 * 1.000000 * abs(ar206.value)
+method_instance perim206 method edge_length
+quantity per206  energy function perim206.value^2 modulus 0
+quantity ten206  energy function 1.000000*perim206.value modulus 0
+
+method_instance ar207 method edge_area
+quantity sq_farea207 energy function ar207.value^2
+quantity farea207 energy function -2 * 1.000000 * abs(ar207.value)
+method_instance perim207 method edge_length
+quantity per207  energy function perim207.value^2 modulus 0
+quantity ten207  energy function 1.000000*perim207.value modulus 0
+
+method_instance ar208 method edge_area
+quantity sq_farea208 energy function ar208.value^2
+quantity farea208 energy function -2 * 1.000000 * abs(ar208.value)
+method_instance perim208 method edge_length
+quantity per208  energy function perim208.value^2 modulus 0
+quantity ten208  energy function 1.000000*perim208.value modulus 0
+
+method_instance ar209 method edge_area
+quantity sq_farea209 energy function ar209.value^2
+quantity farea209 energy function -2 * 1.000000 * abs(ar209.value)
+method_instance perim209 method edge_length
+quantity per209  energy function perim209.value^2 modulus 0
+quantity ten209  energy function 1.000000*perim209.value modulus 0
+
+method_instance ar210 method edge_area
+quantity sq_farea210 energy function ar210.value^2
+quantity farea210 energy function -2 * 1.000000 * abs(ar210.value)
+method_instance perim210 method edge_length
+quantity per210  energy function perim210.value^2 modulus 0
+quantity ten210  energy function 1.000000*perim210.value modulus 0
+
+method_instance ar211 method edge_area
+quantity sq_farea211 energy function ar211.value^2
+quantity farea211 energy function -2 * 1.000000 * abs(ar211.value)
+method_instance perim211 method edge_length
+quantity per211  energy function perim211.value^2 modulus 0
+quantity ten211  energy function 1.000000*perim211.value modulus 0
+
+method_instance ar212 method edge_area
+quantity sq_farea212 energy function ar212.value^2
+quantity farea212 energy function -2 * 1.000000 * abs(ar212.value)
+method_instance perim212 method edge_length
+quantity per212  energy function perim212.value^2 modulus 0
+quantity ten212  energy function 1.000000*perim212.value modulus 0
+
+method_instance ar213 method edge_area
+quantity sq_farea213 energy function ar213.value^2
+quantity farea213 energy function -2 * 1.000000 * abs(ar213.value)
+method_instance perim213 method edge_length
+quantity per213  energy function perim213.value^2 modulus 0
+quantity ten213  energy function 1.000000*perim213.value modulus 0
+
+method_instance ar214 method edge_area
+quantity sq_farea214 energy function ar214.value^2
+quantity farea214 energy function -2 * 1.000000 * abs(ar214.value)
+method_instance perim214 method edge_length
+quantity per214  energy function perim214.value^2 modulus 0
+quantity ten214  energy function 1.000000*perim214.value modulus 0
+
+method_instance ar215 method edge_area
+quantity sq_farea215 energy function ar215.value^2
+quantity farea215 energy function -2 * 1.000000 * abs(ar215.value)
+method_instance perim215 method edge_length
+quantity per215  energy function perim215.value^2 modulus 0
+quantity ten215  energy function 1.000000*perim215.value modulus 0
+
+method_instance ar216 method edge_area
+quantity sq_farea216 energy function ar216.value^2
+quantity farea216 energy function -2 * 1.000000 * abs(ar216.value)
+method_instance perim216 method edge_length
+quantity per216  energy function perim216.value^2 modulus 0
+quantity ten216  energy function 1.000000*perim216.value modulus 0
+
+method_instance ar217 method edge_area
+quantity sq_farea217 energy function ar217.value^2
+quantity farea217 energy function -2 * 1.000000 * abs(ar217.value)
+method_instance perim217 method edge_length
+quantity per217  energy function perim217.value^2 modulus 0
+quantity ten217  energy function 1.000000*perim217.value modulus 0
+
+method_instance ar218 method edge_area
+quantity sq_farea218 energy function ar218.value^2
+quantity farea218 energy function -2 * 1.000000 * abs(ar218.value)
+method_instance perim218 method edge_length
+quantity per218  energy function perim218.value^2 modulus 0
+quantity ten218  energy function 1.000000*perim218.value modulus 0
+
+method_instance ar219 method edge_area
+quantity sq_farea219 energy function ar219.value^2
+quantity farea219 energy function -2 * 1.000000 * abs(ar219.value)
+method_instance perim219 method edge_length
+quantity per219  energy function perim219.value^2 modulus 0
+quantity ten219  energy function 1.000000*perim219.value modulus 0
+
+method_instance ar220 method edge_area
+quantity sq_farea220 energy function ar220.value^2
+quantity farea220 energy function -2 * 1.000000 * abs(ar220.value)
+method_instance perim220 method edge_length
+quantity per220  energy function perim220.value^2 modulus 0
+quantity ten220  energy function 1.000000*perim220.value modulus 0
+
+method_instance ar221 method edge_area
+quantity sq_farea221 energy function ar221.value^2
+quantity farea221 energy function -2 * 1.000000 * abs(ar221.value)
+method_instance perim221 method edge_length
+quantity per221  energy function perim221.value^2 modulus 0
+quantity ten221  energy function 1.000000*perim221.value modulus 0
+
+method_instance ar222 method edge_area
+quantity sq_farea222 energy function ar222.value^2
+quantity farea222 energy function -2 * 1.000000 * abs(ar222.value)
+method_instance perim222 method edge_length
+quantity per222  energy function perim222.value^2 modulus 0
+quantity ten222  energy function 1.000000*perim222.value modulus 0
+
+method_instance ar223 method edge_area
+quantity sq_farea223 energy function ar223.value^2
+quantity farea223 energy function -2 * 1.000000 * abs(ar223.value)
+method_instance perim223 method edge_length
+quantity per223  energy function perim223.value^2 modulus 0
+quantity ten223  energy function 1.000000*perim223.value modulus 0
+
+method_instance ar224 method edge_area
+quantity sq_farea224 energy function ar224.value^2
+quantity farea224 energy function -2 * 1.000000 * abs(ar224.value)
+method_instance perim224 method edge_length
+quantity per224  energy function perim224.value^2 modulus 0
+quantity ten224  energy function 1.000000*perim224.value modulus 0
+
+method_instance ar225 method edge_area
+quantity sq_farea225 energy function ar225.value^2
+quantity farea225 energy function -2 * 1.000000 * abs(ar225.value)
+method_instance perim225 method edge_length
+quantity per225  energy function perim225.value^2 modulus 0
+quantity ten225  energy function 1.000000*perim225.value modulus 0
+
+method_instance ar226 method edge_area
+quantity sq_farea226 energy function ar226.value^2
+quantity farea226 energy function -2 * 1.000000 * abs(ar226.value)
+method_instance perim226 method edge_length
+quantity per226  energy function perim226.value^2 modulus 0
+quantity ten226  energy function 1.000000*perim226.value modulus 0
+
+method_instance ar227 method edge_area
+quantity sq_farea227 energy function ar227.value^2
+quantity farea227 energy function -2 * 1.000000 * abs(ar227.value)
+method_instance perim227 method edge_length
+quantity per227  energy function perim227.value^2 modulus 0
+quantity ten227  energy function 1.000000*perim227.value modulus 0
+
+method_instance ar228 method edge_area
+quantity sq_farea228 energy function ar228.value^2
+quantity farea228 energy function -2 * 1.000000 * abs(ar228.value)
+method_instance perim228 method edge_length
+quantity per228  energy function perim228.value^2 modulus 0
+quantity ten228  energy function 1.000000*perim228.value modulus 0
+
+method_instance ar229 method edge_area
+quantity sq_farea229 energy function ar229.value^2
+quantity farea229 energy function -2 * 1.000000 * abs(ar229.value)
+method_instance perim229 method edge_length
+quantity per229  energy function perim229.value^2 modulus 0
+quantity ten229  energy function 1.000000*perim229.value modulus 0
+
+method_instance ar230 method edge_area
+quantity sq_farea230 energy function ar230.value^2
+quantity farea230 energy function -2 * 1.000000 * abs(ar230.value)
+method_instance perim230 method edge_length
+quantity per230  energy function perim230.value^2 modulus 0
+quantity ten230  energy function 1.000000*perim230.value modulus 0
+
+method_instance ar231 method edge_area
+quantity sq_farea231 energy function ar231.value^2
+quantity farea231 energy function -2 * 1.000000 * abs(ar231.value)
+method_instance perim231 method edge_length
+quantity per231  energy function perim231.value^2 modulus 0
+quantity ten231  energy function 1.000000*perim231.value modulus 0
+
+method_instance ar232 method edge_area
+quantity sq_farea232 energy function ar232.value^2
+quantity farea232 energy function -2 * 1.000000 * abs(ar232.value)
+method_instance perim232 method edge_length
+quantity per232  energy function perim232.value^2 modulus 0
+quantity ten232  energy function 1.000000*perim232.value modulus 0
+
+method_instance ar233 method edge_area
+quantity sq_farea233 energy function ar233.value^2
+quantity farea233 energy function -2 * 1.000000 * abs(ar233.value)
+method_instance perim233 method edge_length
+quantity per233  energy function perim233.value^2 modulus 0
+quantity ten233  energy function 1.000000*perim233.value modulus 0
+
+method_instance ar234 method edge_area
+quantity sq_farea234 energy function ar234.value^2
+quantity farea234 energy function -2 * 1.000000 * abs(ar234.value)
+method_instance perim234 method edge_length
+quantity per234  energy function perim234.value^2 modulus 0
+quantity ten234  energy function 1.000000*perim234.value modulus 0
+
+method_instance ar235 method edge_area
+quantity sq_farea235 energy function ar235.value^2
+quantity farea235 energy function -2 * 1.000000 * abs(ar235.value)
+method_instance perim235 method edge_length
+quantity per235  energy function perim235.value^2 modulus 0
+quantity ten235  energy function 1.000000*perim235.value modulus 0
+
+method_instance ar236 method edge_area
+quantity sq_farea236 energy function ar236.value^2
+quantity farea236 energy function -2 * 1.000000 * abs(ar236.value)
+method_instance perim236 method edge_length
+quantity per236  energy function perim236.value^2 modulus 0
+quantity ten236  energy function 1.000000*perim236.value modulus 0
+
+method_instance ar237 method edge_area
+quantity sq_farea237 energy function ar237.value^2
+quantity farea237 energy function -2 * 1.000000 * abs(ar237.value)
+method_instance perim237 method edge_length
+quantity per237  energy function perim237.value^2 modulus 0
+quantity ten237  energy function 1.000000*perim237.value modulus 0
+
+method_instance ar238 method edge_area
+quantity sq_farea238 energy function ar238.value^2
+quantity farea238 energy function -2 * 1.000000 * abs(ar238.value)
+method_instance perim238 method edge_length
+quantity per238  energy function perim238.value^2 modulus 0
+quantity ten238  energy function 1.000000*perim238.value modulus 0
+
+method_instance ar239 method edge_area
+quantity sq_farea239 energy function ar239.value^2
+quantity farea239 energy function -2 * 1.000000 * abs(ar239.value)
+method_instance perim239 method edge_length
+quantity per239  energy function perim239.value^2 modulus 0
+quantity ten239  energy function 1.000000*perim239.value modulus 0
+
+method_instance ar240 method edge_area
+quantity sq_farea240 energy function ar240.value^2
+quantity farea240 energy function -2 * 1.000000 * abs(ar240.value)
+method_instance perim240 method edge_length
+quantity per240  energy function perim240.value^2 modulus 0
+quantity ten240  energy function 1.000000*perim240.value modulus 0
+
+method_instance ar241 method edge_area
+quantity sq_farea241 energy function ar241.value^2
+quantity farea241 energy function -2 * 1.000000 * abs(ar241.value)
+method_instance perim241 method edge_length
+quantity per241  energy function perim241.value^2 modulus 0
+quantity ten241  energy function 1.000000*perim241.value modulus 0
+
+method_instance ar242 method edge_area
+quantity sq_farea242 energy function ar242.value^2
+quantity farea242 energy function -2 * 1.000000 * abs(ar242.value)
+method_instance perim242 method edge_length
+quantity per242  energy function perim242.value^2 modulus 0
+quantity ten242  energy function 1.000000*perim242.value modulus 0
+
+method_instance ar243 method edge_area
+quantity sq_farea243 energy function ar243.value^2
+quantity farea243 energy function -2 * 1.000000 * abs(ar243.value)
+method_instance perim243 method edge_length
+quantity per243  energy function perim243.value^2 modulus 0
+quantity ten243  energy function 1.000000*perim243.value modulus 0
+
+method_instance ar244 method edge_area
+quantity sq_farea244 energy function ar244.value^2
+quantity farea244 energy function -2 * 1.000000 * abs(ar244.value)
+method_instance perim244 method edge_length
+quantity per244  energy function perim244.value^2 modulus 0
+quantity ten244  energy function 1.000000*perim244.value modulus 0
+
+method_instance ar245 method edge_area
+quantity sq_farea245 energy function ar245.value^2
+quantity farea245 energy function -2 * 1.000000 * abs(ar245.value)
+method_instance perim245 method edge_length
+quantity per245  energy function perim245.value^2 modulus 0
+quantity ten245  energy function 1.000000*perim245.value modulus 0
+
+method_instance ar246 method edge_area
+quantity sq_farea246 energy function ar246.value^2
+quantity farea246 energy function -2 * 1.000000 * abs(ar246.value)
+method_instance perim246 method edge_length
+quantity per246  energy function perim246.value^2 modulus 0
+quantity ten246  energy function 1.000000*perim246.value modulus 0
+
+method_instance ar247 method edge_area
+quantity sq_farea247 energy function ar247.value^2
+quantity farea247 energy function -2 * 1.000000 * abs(ar247.value)
+method_instance perim247 method edge_length
+quantity per247  energy function perim247.value^2 modulus 0
+quantity ten247  energy function 1.000000*perim247.value modulus 0
+
+method_instance ar248 method edge_area
+quantity sq_farea248 energy function ar248.value^2
+quantity farea248 energy function -2 * 1.000000 * abs(ar248.value)
+method_instance perim248 method edge_length
+quantity per248  energy function perim248.value^2 modulus 0
+quantity ten248  energy function 1.000000*perim248.value modulus 0
+
+method_instance ar249 method edge_area
+quantity sq_farea249 energy function ar249.value^2
+quantity farea249 energy function -2 * 1.000000 * abs(ar249.value)
+method_instance perim249 method edge_length
+quantity per249  energy function perim249.value^2 modulus 0
+quantity ten249  energy function 1.000000*perim249.value modulus 0
+
+method_instance ar250 method edge_area
+quantity sq_farea250 energy function ar250.value^2
+quantity farea250 energy function -2 * 1.000000 * abs(ar250.value)
+method_instance perim250 method edge_length
+quantity per250  energy function perim250.value^2 modulus 0
+quantity ten250  energy function 1.000000*perim250.value modulus 0
+
+method_instance ar251 method edge_area
+quantity sq_farea251 energy function ar251.value^2
+quantity farea251 energy function -2 * 1.000000 * abs(ar251.value)
+method_instance perim251 method edge_length
+quantity per251  energy function perim251.value^2 modulus 0
+quantity ten251  energy function 1.000000*perim251.value modulus 0
+
+method_instance ar252 method edge_area
+quantity sq_farea252 energy function ar252.value^2
+quantity farea252 energy function -2 * 1.000000 * abs(ar252.value)
+method_instance perim252 method edge_length
+quantity per252  energy function perim252.value^2 modulus 0
+quantity ten252  energy function 1.000000*perim252.value modulus 0
+
+method_instance ar253 method edge_area
+quantity sq_farea253 energy function ar253.value^2
+quantity farea253 energy function -2 * 1.000000 * abs(ar253.value)
+method_instance perim253 method edge_length
+quantity per253  energy function perim253.value^2 modulus 0
+quantity ten253  energy function 1.000000*perim253.value modulus 0
+
+method_instance ar254 method edge_area
+quantity sq_farea254 energy function ar254.value^2
+quantity farea254 energy function -2 * 1.000000 * abs(ar254.value)
+method_instance perim254 method edge_length
+quantity per254  energy function perim254.value^2 modulus 0
+quantity ten254  energy function 1.000000*perim254.value modulus 0
+
+method_instance ar255 method edge_area
+quantity sq_farea255 energy function ar255.value^2
+quantity farea255 energy function -2 * 1.000000 * abs(ar255.value)
+method_instance perim255 method edge_length
+quantity per255  energy function perim255.value^2 modulus 0
+quantity ten255  energy function 1.000000*perim255.value modulus 0
+
+method_instance ar256 method edge_area
+quantity sq_farea256 energy function ar256.value^2
+quantity farea256 energy function -2 * 1.000000 * abs(ar256.value)
+method_instance perim256 method edge_length
+quantity per256  energy function perim256.value^2 modulus 0
+quantity ten256  energy function 1.000000*perim256.value modulus 0
+
+method_instance ar257 method edge_area
+quantity sq_farea257 energy function ar257.value^2
+quantity farea257 energy function -2 * 1.000000 * abs(ar257.value)
+method_instance perim257 method edge_length
+quantity per257  energy function perim257.value^2 modulus 0
+quantity ten257  energy function 1.000000*perim257.value modulus 0
+
+method_instance ar258 method edge_area
+quantity sq_farea258 energy function ar258.value^2
+quantity farea258 energy function -2 * 1.000000 * abs(ar258.value)
+method_instance perim258 method edge_length
+quantity per258  energy function perim258.value^2 modulus 0
+quantity ten258  energy function 1.000000*perim258.value modulus 0
+
+method_instance ar259 method edge_area
+quantity sq_farea259 energy function ar259.value^2
+quantity farea259 energy function -2 * 1.000000 * abs(ar259.value)
+method_instance perim259 method edge_length
+quantity per259  energy function perim259.value^2 modulus 0
+quantity ten259  energy function 1.000000*perim259.value modulus 0
+
+method_instance ar260 method edge_area
+quantity sq_farea260 energy function ar260.value^2
+quantity farea260 energy function -2 * 1.000000 * abs(ar260.value)
+method_instance perim260 method edge_length
+quantity per260  energy function perim260.value^2 modulus 0
+quantity ten260  energy function 1.000000*perim260.value modulus 0
+
+method_instance ar261 method edge_area
+quantity sq_farea261 energy function ar261.value^2
+quantity farea261 energy function -2 * 1.000000 * abs(ar261.value)
+method_instance perim261 method edge_length
+quantity per261  energy function perim261.value^2 modulus 0
+quantity ten261  energy function 1.000000*perim261.value modulus 0
+
+method_instance ar262 method edge_area
+quantity sq_farea262 energy function ar262.value^2
+quantity farea262 energy function -2 * 1.000000 * abs(ar262.value)
+method_instance perim262 method edge_length
+quantity per262  energy function perim262.value^2 modulus 0
+quantity ten262  energy function 1.000000*perim262.value modulus 0
+
+method_instance ar263 method edge_area
+quantity sq_farea263 energy function ar263.value^2
+quantity farea263 energy function -2 * 1.000000 * abs(ar263.value)
+method_instance perim263 method edge_length
+quantity per263  energy function perim263.value^2 modulus 0
+quantity ten263  energy function 1.000000*perim263.value modulus 0
+
+method_instance ar264 method edge_area
+quantity sq_farea264 energy function ar264.value^2
+quantity farea264 energy function -2 * 1.000000 * abs(ar264.value)
+method_instance perim264 method edge_length
+quantity per264  energy function perim264.value^2 modulus 0
+quantity ten264  energy function 1.000000*perim264.value modulus 0
+
+method_instance ar265 method edge_area
+quantity sq_farea265 energy function ar265.value^2
+quantity farea265 energy function -2 * 1.000000 * abs(ar265.value)
+method_instance perim265 method edge_length
+quantity per265  energy function perim265.value^2 modulus 0
+quantity ten265  energy function 1.000000*perim265.value modulus 0
+
+method_instance ar266 method edge_area
+quantity sq_farea266 energy function ar266.value^2
+quantity farea266 energy function -2 * 1.000000 * abs(ar266.value)
+method_instance perim266 method edge_length
+quantity per266  energy function perim266.value^2 modulus 0
+quantity ten266  energy function 1.000000*perim266.value modulus 0
+
+method_instance ar267 method edge_area
+quantity sq_farea267 energy function ar267.value^2
+quantity farea267 energy function -2 * 1.000000 * abs(ar267.value)
+method_instance perim267 method edge_length
+quantity per267  energy function perim267.value^2 modulus 0
+quantity ten267  energy function 1.000000*perim267.value modulus 0
+
+method_instance ar268 method edge_area
+quantity sq_farea268 energy function ar268.value^2
+quantity farea268 energy function -2 * 1.000000 * abs(ar268.value)
+method_instance perim268 method edge_length
+quantity per268  energy function perim268.value^2 modulus 0
+quantity ten268  energy function 1.000000*perim268.value modulus 0
+
+method_instance ar269 method edge_area
+quantity sq_farea269 energy function ar269.value^2
+quantity farea269 energy function -2 * 1.000000 * abs(ar269.value)
+method_instance perim269 method edge_length
+quantity per269  energy function perim269.value^2 modulus 0
+quantity ten269  energy function 1.000000*perim269.value modulus 0
+
+method_instance ar270 method edge_area
+quantity sq_farea270 energy function ar270.value^2
+quantity farea270 energy function -2 * 1.000000 * abs(ar270.value)
+method_instance perim270 method edge_length
+quantity per270  energy function perim270.value^2 modulus 0
+quantity ten270  energy function 1.000000*perim270.value modulus 0
+
+method_instance ar271 method edge_area
+quantity sq_farea271 energy function ar271.value^2
+quantity farea271 energy function -2 * 1.000000 * abs(ar271.value)
+method_instance perim271 method edge_length
+quantity per271  energy function perim271.value^2 modulus 0
+quantity ten271  energy function 1.000000*perim271.value modulus 0
+
+method_instance ar272 method edge_area
+quantity sq_farea272 energy function ar272.value^2
+quantity farea272 energy function -2 * 1.000000 * abs(ar272.value)
+method_instance perim272 method edge_length
+quantity per272  energy function perim272.value^2 modulus 0
+quantity ten272  energy function 1.000000*perim272.value modulus 0
+
+method_instance ar273 method edge_area
+quantity sq_farea273 energy function ar273.value^2
+quantity farea273 energy function -2 * 1.000000 * abs(ar273.value)
+method_instance perim273 method edge_length
+quantity per273  energy function perim273.value^2 modulus 0
+quantity ten273  energy function 1.000000*perim273.value modulus 0
+
+method_instance ar274 method edge_area
+quantity sq_farea274 energy function ar274.value^2
+quantity farea274 energy function -2 * 1.000000 * abs(ar274.value)
+method_instance perim274 method edge_length
+quantity per274  energy function perim274.value^2 modulus 0
+quantity ten274  energy function 1.000000*perim274.value modulus 0
+
+method_instance ar275 method edge_area
+quantity sq_farea275 energy function ar275.value^2
+quantity farea275 energy function -2 * 1.000000 * abs(ar275.value)
+method_instance perim275 method edge_length
+quantity per275  energy function perim275.value^2 modulus 0
+quantity ten275  energy function 1.000000*perim275.value modulus 0
+
+method_instance ar276 method edge_area
+quantity sq_farea276 energy function ar276.value^2
+quantity farea276 energy function -2 * 1.000000 * abs(ar276.value)
+method_instance perim276 method edge_length
+quantity per276  energy function perim276.value^2 modulus 0
+quantity ten276  energy function 1.000000*perim276.value modulus 0
+
+method_instance ar277 method edge_area
+quantity sq_farea277 energy function ar277.value^2
+quantity farea277 energy function -2 * 1.000000 * abs(ar277.value)
+method_instance perim277 method edge_length
+quantity per277  energy function perim277.value^2 modulus 0
+quantity ten277  energy function 1.000000*perim277.value modulus 0
+
+method_instance ar278 method edge_area
+quantity sq_farea278 energy function ar278.value^2
+quantity farea278 energy function -2 * 1.000000 * abs(ar278.value)
+method_instance perim278 method edge_length
+quantity per278  energy function perim278.value^2 modulus 0
+quantity ten278  energy function 1.000000*perim278.value modulus 0
+
+method_instance ar279 method edge_area
+quantity sq_farea279 energy function ar279.value^2
+quantity farea279 energy function -2 * 1.000000 * abs(ar279.value)
+method_instance perim279 method edge_length
+quantity per279  energy function perim279.value^2 modulus 0
+quantity ten279  energy function 1.000000*perim279.value modulus 0
+
+method_instance ar280 method edge_area
+quantity sq_farea280 energy function ar280.value^2
+quantity farea280 energy function -2 * 1.000000 * abs(ar280.value)
+method_instance perim280 method edge_length
+quantity per280  energy function perim280.value^2 modulus 0
+quantity ten280  energy function 1.000000*perim280.value modulus 0
+
+method_instance ar281 method edge_area
+quantity sq_farea281 energy function ar281.value^2
+quantity farea281 energy function -2 * 1.000000 * abs(ar281.value)
+method_instance perim281 method edge_length
+quantity per281  energy function perim281.value^2 modulus 0
+quantity ten281  energy function 1.000000*perim281.value modulus 0
+
+method_instance ar282 method edge_area
+quantity sq_farea282 energy function ar282.value^2
+quantity farea282 energy function -2 * 1.000000 * abs(ar282.value)
+method_instance perim282 method edge_length
+quantity per282  energy function perim282.value^2 modulus 0
+quantity ten282  energy function 1.000000*perim282.value modulus 0
+
+method_instance ar283 method edge_area
+quantity sq_farea283 energy function ar283.value^2
+quantity farea283 energy function -2 * 1.000000 * abs(ar283.value)
+method_instance perim283 method edge_length
+quantity per283  energy function perim283.value^2 modulus 0
+quantity ten283  energy function 1.000000*perim283.value modulus 0
+
+method_instance ar284 method edge_area
+quantity sq_farea284 energy function ar284.value^2
+quantity farea284 energy function -2 * 1.000000 * abs(ar284.value)
+method_instance perim284 method edge_length
+quantity per284  energy function perim284.value^2 modulus 0
+quantity ten284  energy function 1.000000*perim284.value modulus 0
+
+method_instance ar285 method edge_area
+quantity sq_farea285 energy function ar285.value^2
+quantity farea285 energy function -2 * 1.000000 * abs(ar285.value)
+method_instance perim285 method edge_length
+quantity per285  energy function perim285.value^2 modulus 0
+quantity ten285  energy function 1.000000*perim285.value modulus 0
+
+method_instance ar286 method edge_area
+quantity sq_farea286 energy function ar286.value^2
+quantity farea286 energy function -2 * 1.000000 * abs(ar286.value)
+method_instance perim286 method edge_length
+quantity per286  energy function perim286.value^2 modulus 0
+quantity ten286  energy function 1.000000*perim286.value modulus 0
+
+method_instance ar287 method edge_area
+quantity sq_farea287 energy function ar287.value^2
+quantity farea287 energy function -2 * 1.000000 * abs(ar287.value)
+method_instance perim287 method edge_length
+quantity per287  energy function perim287.value^2 modulus 0
+quantity ten287  energy function 1.000000*perim287.value modulus 0
+
+method_instance ar288 method edge_area
+quantity sq_farea288 energy function ar288.value^2
+quantity farea288 energy function -2 * 1.000000 * abs(ar288.value)
+method_instance perim288 method edge_length
+quantity per288  energy function perim288.value^2 modulus 0
+quantity ten288  energy function 1.000000*perim288.value modulus 0
+
+method_instance ar289 method edge_area
+quantity sq_farea289 energy function ar289.value^2
+quantity farea289 energy function -2 * 1.000000 * abs(ar289.value)
+method_instance perim289 method edge_length
+quantity per289  energy function perim289.value^2 modulus 0
+quantity ten289  energy function 1.000000*perim289.value modulus 0
+
+method_instance ar290 method edge_area
+quantity sq_farea290 energy function ar290.value^2
+quantity farea290 energy function -2 * 1.000000 * abs(ar290.value)
+method_instance perim290 method edge_length
+quantity per290  energy function perim290.value^2 modulus 0
+quantity ten290  energy function 1.000000*perim290.value modulus 0
+
+method_instance ar291 method edge_area
+quantity sq_farea291 energy function ar291.value^2
+quantity farea291 energy function -2 * 1.000000 * abs(ar291.value)
+method_instance perim291 method edge_length
+quantity per291  energy function perim291.value^2 modulus 0
+quantity ten291  energy function 1.000000*perim291.value modulus 0
+
+method_instance ar292 method edge_area
+quantity sq_farea292 energy function ar292.value^2
+quantity farea292 energy function -2 * 1.000000 * abs(ar292.value)
+method_instance perim292 method edge_length
+quantity per292  energy function perim292.value^2 modulus 0
+quantity ten292  energy function 1.000000*perim292.value modulus 0
+
+method_instance ar293 method edge_area
+quantity sq_farea293 energy function ar293.value^2
+quantity farea293 energy function -2 * 1.000000 * abs(ar293.value)
+method_instance perim293 method edge_length
+quantity per293  energy function perim293.value^2 modulus 0
+quantity ten293  energy function 1.000000*perim293.value modulus 0
+
+method_instance ar294 method edge_area
+quantity sq_farea294 energy function ar294.value^2
+quantity farea294 energy function -2 * 1.000000 * abs(ar294.value)
+method_instance perim294 method edge_length
+quantity per294  energy function perim294.value^2 modulus 0
+quantity ten294  energy function 1.000000*perim294.value modulus 0
+
+method_instance ar295 method edge_area
+quantity sq_farea295 energy function ar295.value^2
+quantity farea295 energy function -2 * 1.000000 * abs(ar295.value)
+method_instance perim295 method edge_length
+quantity per295  energy function perim295.value^2 modulus 0
+quantity ten295  energy function 1.000000*perim295.value modulus 0
+
+method_instance ar296 method edge_area
+quantity sq_farea296 energy function ar296.value^2
+quantity farea296 energy function -2 * 1.000000 * abs(ar296.value)
+method_instance perim296 method edge_length
+quantity per296  energy function perim296.value^2 modulus 0
+quantity ten296  energy function 1.000000*perim296.value modulus 0
+
+method_instance ar297 method edge_area
+quantity sq_farea297 energy function ar297.value^2
+quantity farea297 energy function -2 * 1.000000 * abs(ar297.value)
+method_instance perim297 method edge_length
+quantity per297  energy function perim297.value^2 modulus 0
+quantity ten297  energy function 1.000000*perim297.value modulus 0
+
+method_instance ar298 method edge_area
+quantity sq_farea298 energy function ar298.value^2
+quantity farea298 energy function -2 * 1.000000 * abs(ar298.value)
+method_instance perim298 method edge_length
+quantity per298  energy function perim298.value^2 modulus 0
+quantity ten298  energy function 1.000000*perim298.value modulus 0
+
+method_instance ar299 method edge_area
+quantity sq_farea299 energy function ar299.value^2
+quantity farea299 energy function -2 * 1.000000 * abs(ar299.value)
+method_instance perim299 method edge_length
+quantity per299  energy function perim299.value^2 modulus 0
+quantity ten299  energy function 1.000000*perim299.value modulus 0
+
+method_instance ar300 method edge_area
+quantity sq_farea300 energy function ar300.value^2
+quantity farea300 energy function -2 * 1.000000 * abs(ar300.value)
+method_instance perim300 method edge_length
+quantity per300  energy function perim300.value^2 modulus 0
+quantity ten300  energy function 1.000000*perim300.value modulus 0
+
+method_instance ar301 method edge_area
+quantity sq_farea301 energy function ar301.value^2
+quantity farea301 energy function -2 * 1.000000 * abs(ar301.value)
+method_instance perim301 method edge_length
+quantity per301  energy function perim301.value^2 modulus 0
+quantity ten301  energy function 1.000000*perim301.value modulus 0
+
+method_instance ar302 method edge_area
+quantity sq_farea302 energy function ar302.value^2
+quantity farea302 energy function -2 * 1.000000 * abs(ar302.value)
+method_instance perim302 method edge_length
+quantity per302  energy function perim302.value^2 modulus 0
+quantity ten302  energy function 1.000000*perim302.value modulus 0
+
+method_instance ar303 method edge_area
+quantity sq_farea303 energy function ar303.value^2
+quantity farea303 energy function -2 * 1.000000 * abs(ar303.value)
+method_instance perim303 method edge_length
+quantity per303  energy function perim303.value^2 modulus 0
+quantity ten303  energy function 1.000000*perim303.value modulus 0
+
+method_instance ar304 method edge_area
+quantity sq_farea304 energy function ar304.value^2
+quantity farea304 energy function -2 * 1.000000 * abs(ar304.value)
+method_instance perim304 method edge_length
+quantity per304  energy function perim304.value^2 modulus 0
+quantity ten304  energy function 1.000000*perim304.value modulus 0
+
+method_instance ar305 method edge_area
+quantity sq_farea305 energy function ar305.value^2
+quantity farea305 energy function -2 * 1.000000 * abs(ar305.value)
+method_instance perim305 method edge_length
+quantity per305  energy function perim305.value^2 modulus 0
+quantity ten305  energy function 1.000000*perim305.value modulus 0
+
+method_instance ar306 method edge_area
+quantity sq_farea306 energy function ar306.value^2
+quantity farea306 energy function -2 * 1.000000 * abs(ar306.value)
+method_instance perim306 method edge_length
+quantity per306  energy function perim306.value^2 modulus 0
+quantity ten306  energy function 1.000000*perim306.value modulus 0
+
+method_instance ar307 method edge_area
+quantity sq_farea307 energy function ar307.value^2
+quantity farea307 energy function -2 * 1.000000 * abs(ar307.value)
+method_instance perim307 method edge_length
+quantity per307  energy function perim307.value^2 modulus 0
+quantity ten307  energy function 1.000000*perim307.value modulus 0
+
+method_instance ar308 method edge_area
+quantity sq_farea308 energy function ar308.value^2
+quantity farea308 energy function -2 * 1.000000 * abs(ar308.value)
+method_instance perim308 method edge_length
+quantity per308  energy function perim308.value^2 modulus 0
+quantity ten308  energy function 1.000000*perim308.value modulus 0
+
+method_instance ar309 method edge_area
+quantity sq_farea309 energy function ar309.value^2
+quantity farea309 energy function -2 * 1.000000 * abs(ar309.value)
+method_instance perim309 method edge_length
+quantity per309  energy function perim309.value^2 modulus 0
+quantity ten309  energy function 1.000000*perim309.value modulus 0
+
+method_instance ar310 method edge_area
+quantity sq_farea310 energy function ar310.value^2
+quantity farea310 energy function -2 * 1.000000 * abs(ar310.value)
+method_instance perim310 method edge_length
+quantity per310  energy function perim310.value^2 modulus 0
+quantity ten310  energy function 1.000000*perim310.value modulus 0
+
+method_instance ar311 method edge_area
+quantity sq_farea311 energy function ar311.value^2
+quantity farea311 energy function -2 * 1.000000 * abs(ar311.value)
+method_instance perim311 method edge_length
+quantity per311  energy function perim311.value^2 modulus 0
+quantity ten311  energy function 1.000000*perim311.value modulus 0
+
+method_instance ar312 method edge_area
+quantity sq_farea312 energy function ar312.value^2
+quantity farea312 energy function -2 * 1.000000 * abs(ar312.value)
+method_instance perim312 method edge_length
+quantity per312  energy function perim312.value^2 modulus 0
+quantity ten312  energy function 1.000000*perim312.value modulus 0
+
+method_instance ar313 method edge_area
+quantity sq_farea313 energy function ar313.value^2
+quantity farea313 energy function -2 * 1.000000 * abs(ar313.value)
+method_instance perim313 method edge_length
+quantity per313  energy function perim313.value^2 modulus 0
+quantity ten313  energy function 1.000000*perim313.value modulus 0
+
+method_instance ar314 method edge_area
+quantity sq_farea314 energy function ar314.value^2
+quantity farea314 energy function -2 * 1.000000 * abs(ar314.value)
+method_instance perim314 method edge_length
+quantity per314  energy function perim314.value^2 modulus 0
+quantity ten314  energy function 1.000000*perim314.value modulus 0
+
+method_instance ar315 method edge_area
+quantity sq_farea315 energy function ar315.value^2
+quantity farea315 energy function -2 * 1.000000 * abs(ar315.value)
+method_instance perim315 method edge_length
+quantity per315  energy function perim315.value^2 modulus 0
+quantity ten315  energy function 1.000000*perim315.value modulus 0
+
+method_instance ar316 method edge_area
+quantity sq_farea316 energy function ar316.value^2
+quantity farea316 energy function -2 * 1.000000 * abs(ar316.value)
+method_instance perim316 method edge_length
+quantity per316  energy function perim316.value^2 modulus 0
+quantity ten316  energy function 1.000000*perim316.value modulus 0
+
+method_instance ar317 method edge_area
+quantity sq_farea317 energy function ar317.value^2
+quantity farea317 energy function -2 * 1.000000 * abs(ar317.value)
+method_instance perim317 method edge_length
+quantity per317  energy function perim317.value^2 modulus 0
+quantity ten317  energy function 1.000000*perim317.value modulus 0
+
+method_instance ar318 method edge_area
+quantity sq_farea318 energy function ar318.value^2
+quantity farea318 energy function -2 * 1.000000 * abs(ar318.value)
+method_instance perim318 method edge_length
+quantity per318  energy function perim318.value^2 modulus 0
+quantity ten318  energy function 1.000000*perim318.value modulus 0
+
+method_instance ar319 method edge_area
+quantity sq_farea319 energy function ar319.value^2
+quantity farea319 energy function -2 * 1.000000 * abs(ar319.value)
+method_instance perim319 method edge_length
+quantity per319  energy function perim319.value^2 modulus 0
+quantity ten319  energy function 1.000000*perim319.value modulus 0
+
+method_instance ar320 method edge_area
+quantity sq_farea320 energy function ar320.value^2
+quantity farea320 energy function -2 * 1.000000 * abs(ar320.value)
+method_instance perim320 method edge_length
+quantity per320  energy function perim320.value^2 modulus 0
+quantity ten320  energy function 1.000000*perim320.value modulus 0
+
+method_instance ar321 method edge_area
+quantity sq_farea321 energy function ar321.value^2
+quantity farea321 energy function -2 * 1.000000 * abs(ar321.value)
+method_instance perim321 method edge_length
+quantity per321  energy function perim321.value^2 modulus 0
+quantity ten321  energy function 1.000000*perim321.value modulus 0
+
+method_instance ar322 method edge_area
+quantity sq_farea322 energy function ar322.value^2
+quantity farea322 energy function -2 * 1.000000 * abs(ar322.value)
+method_instance perim322 method edge_length
+quantity per322  energy function perim322.value^2 modulus 0
+quantity ten322  energy function 1.000000*perim322.value modulus 0
+
+method_instance ar323 method edge_area
+quantity sq_farea323 energy function ar323.value^2
+quantity farea323 energy function -2 * 1.000000 * abs(ar323.value)
+method_instance perim323 method edge_length
+quantity per323  energy function perim323.value^2 modulus 0
+quantity ten323  energy function 1.000000*perim323.value modulus 0
+
+method_instance ar324 method edge_area
+quantity sq_farea324 energy function ar324.value^2
+quantity farea324 energy function -2 * 1.000000 * abs(ar324.value)
+method_instance perim324 method edge_length
+quantity per324  energy function perim324.value^2 modulus 0
+quantity ten324  energy function 1.000000*perim324.value modulus 0
+
+method_instance ar325 method edge_area
+quantity sq_farea325 energy function ar325.value^2
+quantity farea325 energy function -2 * 1.000000 * abs(ar325.value)
+method_instance perim325 method edge_length
+quantity per325  energy function perim325.value^2 modulus 0
+quantity ten325  energy function 1.000000*perim325.value modulus 0
+
+method_instance ar326 method edge_area
+quantity sq_farea326 energy function ar326.value^2
+quantity farea326 energy function -2 * 1.000000 * abs(ar326.value)
+method_instance perim326 method edge_length
+quantity per326  energy function perim326.value^2 modulus 0
+quantity ten326  energy function 1.000000*perim326.value modulus 0
+
+method_instance ar327 method edge_area
+quantity sq_farea327 energy function ar327.value^2
+quantity farea327 energy function -2 * 1.000000 * abs(ar327.value)
+method_instance perim327 method edge_length
+quantity per327  energy function perim327.value^2 modulus 0
+quantity ten327  energy function 1.000000*perim327.value modulus 0
+
+method_instance ar328 method edge_area
+quantity sq_farea328 energy function ar328.value^2
+quantity farea328 energy function -2 * 1.000000 * abs(ar328.value)
+method_instance perim328 method edge_length
+quantity per328  energy function perim328.value^2 modulus 0
+quantity ten328  energy function 1.000000*perim328.value modulus 0
+
+method_instance ar329 method edge_area
+quantity sq_farea329 energy function ar329.value^2
+quantity farea329 energy function -2 * 1.000000 * abs(ar329.value)
+method_instance perim329 method edge_length
+quantity per329  energy function perim329.value^2 modulus 0
+quantity ten329  energy function 1.000000*perim329.value modulus 0
+
+method_instance ar330 method edge_area
+quantity sq_farea330 energy function ar330.value^2
+quantity farea330 energy function -2 * 1.000000 * abs(ar330.value)
+method_instance perim330 method edge_length
+quantity per330  energy function perim330.value^2 modulus 0
+quantity ten330  energy function 1.000000*perim330.value modulus 0
+
+method_instance ar331 method edge_area
+quantity sq_farea331 energy function ar331.value^2
+quantity farea331 energy function -2 * 1.000000 * abs(ar331.value)
+method_instance perim331 method edge_length
+quantity per331  energy function perim331.value^2 modulus 0
+quantity ten331  energy function 1.000000*perim331.value modulus 0
+
+method_instance ar332 method edge_area
+quantity sq_farea332 energy function ar332.value^2
+quantity farea332 energy function -2 * 1.000000 * abs(ar332.value)
+method_instance perim332 method edge_length
+quantity per332  energy function perim332.value^2 modulus 0
+quantity ten332  energy function 1.000000*perim332.value modulus 0
+
+method_instance ar333 method edge_area
+quantity sq_farea333 energy function ar333.value^2
+quantity farea333 energy function -2 * 1.000000 * abs(ar333.value)
+method_instance perim333 method edge_length
+quantity per333  energy function perim333.value^2 modulus 0
+quantity ten333  energy function 1.000000*perim333.value modulus 0
+
+method_instance ar334 method edge_area
+quantity sq_farea334 energy function ar334.value^2
+quantity farea334 energy function -2 * 1.000000 * abs(ar334.value)
+method_instance perim334 method edge_length
+quantity per334  energy function perim334.value^2 modulus 0
+quantity ten334  energy function 1.000000*perim334.value modulus 0
+
+method_instance ar335 method edge_area
+quantity sq_farea335 energy function ar335.value^2
+quantity farea335 energy function -2 * 1.000000 * abs(ar335.value)
+method_instance perim335 method edge_length
+quantity per335  energy function perim335.value^2 modulus 0
+quantity ten335  energy function 1.000000*perim335.value modulus 0
+
+method_instance ar336 method edge_area
+quantity sq_farea336 energy function ar336.value^2
+quantity farea336 energy function -2 * 1.000000 * abs(ar336.value)
+method_instance perim336 method edge_length
+quantity per336  energy function perim336.value^2 modulus 0
+quantity ten336  energy function 1.000000*perim336.value modulus 0
+
+method_instance ar337 method edge_area
+quantity sq_farea337 energy function ar337.value^2
+quantity farea337 energy function -2 * 1.000000 * abs(ar337.value)
+method_instance perim337 method edge_length
+quantity per337  energy function perim337.value^2 modulus 0
+quantity ten337  energy function 1.000000*perim337.value modulus 0
+
+method_instance ar338 method edge_area
+quantity sq_farea338 energy function ar338.value^2
+quantity farea338 energy function -2 * 1.000000 * abs(ar338.value)
+method_instance perim338 method edge_length
+quantity per338  energy function perim338.value^2 modulus 0
+quantity ten338  energy function 1.000000*perim338.value modulus 0
+
+method_instance ar339 method edge_area
+quantity sq_farea339 energy function ar339.value^2
+quantity farea339 energy function -2 * 1.000000 * abs(ar339.value)
+method_instance perim339 method edge_length
+quantity per339  energy function perim339.value^2 modulus 0
+quantity ten339  energy function 1.000000*perim339.value modulus 0
+
+method_instance ar340 method edge_area
+quantity sq_farea340 energy function ar340.value^2
+quantity farea340 energy function -2 * 1.000000 * abs(ar340.value)
+method_instance perim340 method edge_length
+quantity per340  energy function perim340.value^2 modulus 0
+quantity ten340  energy function 1.000000*perim340.value modulus 0
+
+method_instance ar341 method edge_area
+quantity sq_farea341 energy function ar341.value^2
+quantity farea341 energy function -2 * 1.000000 * abs(ar341.value)
+method_instance perim341 method edge_length
+quantity per341  energy function perim341.value^2 modulus 0
+quantity ten341  energy function 1.000000*perim341.value modulus 0
+
+method_instance ar342 method edge_area
+quantity sq_farea342 energy function ar342.value^2
+quantity farea342 energy function -2 * 1.000000 * abs(ar342.value)
+method_instance perim342 method edge_length
+quantity per342  energy function perim342.value^2 modulus 0
+quantity ten342  energy function 1.000000*perim342.value modulus 0
+
+method_instance ar343 method edge_area
+quantity sq_farea343 energy function ar343.value^2
+quantity farea343 energy function -2 * 1.000000 * abs(ar343.value)
+method_instance perim343 method edge_length
+quantity per343  energy function perim343.value^2 modulus 0
+quantity ten343  energy function 1.000000*perim343.value modulus 0
+
+method_instance ar344 method edge_area
+quantity sq_farea344 energy function ar344.value^2
+quantity farea344 energy function -2 * 1.000000 * abs(ar344.value)
+method_instance perim344 method edge_length
+quantity per344  energy function perim344.value^2 modulus 0
+quantity ten344  energy function 1.000000*perim344.value modulus 0
+
+method_instance ar345 method edge_area
+quantity sq_farea345 energy function ar345.value^2
+quantity farea345 energy function -2 * 1.000000 * abs(ar345.value)
+method_instance perim345 method edge_length
+quantity per345  energy function perim345.value^2 modulus 0
+quantity ten345  energy function 1.000000*perim345.value modulus 0
+
+method_instance ar346 method edge_area
+quantity sq_farea346 energy function ar346.value^2
+quantity farea346 energy function -2 * 1.000000 * abs(ar346.value)
+method_instance perim346 method edge_length
+quantity per346  energy function perim346.value^2 modulus 0
+quantity ten346  energy function 1.000000*perim346.value modulus 0
+
+method_instance ar347 method edge_area
+quantity sq_farea347 energy function ar347.value^2
+quantity farea347 energy function -2 * 1.000000 * abs(ar347.value)
+method_instance perim347 method edge_length
+quantity per347  energy function perim347.value^2 modulus 0
+quantity ten347  energy function 1.000000*perim347.value modulus 0
+
+method_instance ar348 method edge_area
+quantity sq_farea348 energy function ar348.value^2
+quantity farea348 energy function -2 * 1.000000 * abs(ar348.value)
+method_instance perim348 method edge_length
+quantity per348  energy function perim348.value^2 modulus 0
+quantity ten348  energy function 1.000000*perim348.value modulus 0
+
+method_instance ar349 method edge_area
+quantity sq_farea349 energy function ar349.value^2
+quantity farea349 energy function -2 * 1.000000 * abs(ar349.value)
+method_instance perim349 method edge_length
+quantity per349  energy function perim349.value^2 modulus 0
+quantity ten349  energy function 1.000000*perim349.value modulus 0
+
+method_instance ar350 method edge_area
+quantity sq_farea350 energy function ar350.value^2
+quantity farea350 energy function -2 * 1.000000 * abs(ar350.value)
+method_instance perim350 method edge_length
+quantity per350  energy function perim350.value^2 modulus 0
+quantity ten350  energy function 1.000000*perim350.value modulus 0
+
+method_instance ar351 method edge_area
+quantity sq_farea351 energy function ar351.value^2
+quantity farea351 energy function -2 * 1.000000 * abs(ar351.value)
+method_instance perim351 method edge_length
+quantity per351  energy function perim351.value^2 modulus 0
+quantity ten351  energy function 1.000000*perim351.value modulus 0
+
+method_instance ar352 method edge_area
+quantity sq_farea352 energy function ar352.value^2
+quantity farea352 energy function -2 * 1.000000 * abs(ar352.value)
+method_instance perim352 method edge_length
+quantity per352  energy function perim352.value^2 modulus 0
+quantity ten352  energy function 1.000000*perim352.value modulus 0
+
+method_instance ar353 method edge_area
+quantity sq_farea353 energy function ar353.value^2
+quantity farea353 energy function -2 * 1.000000 * abs(ar353.value)
+method_instance perim353 method edge_length
+quantity per353  energy function perim353.value^2 modulus 0
+quantity ten353  energy function 1.000000*perim353.value modulus 0
+
+method_instance ar354 method edge_area
+quantity sq_farea354 energy function ar354.value^2
+quantity farea354 energy function -2 * 1.000000 * abs(ar354.value)
+method_instance perim354 method edge_length
+quantity per354  energy function perim354.value^2 modulus 0
+quantity ten354  energy function 1.000000*perim354.value modulus 0
+
+method_instance ar355 method edge_area
+quantity sq_farea355 energy function ar355.value^2
+quantity farea355 energy function -2 * 1.000000 * abs(ar355.value)
+method_instance perim355 method edge_length
+quantity per355  energy function perim355.value^2 modulus 0
+quantity ten355  energy function 1.000000*perim355.value modulus 0
+
+method_instance ar356 method edge_area
+quantity sq_farea356 energy function ar356.value^2
+quantity farea356 energy function -2 * 1.000000 * abs(ar356.value)
+method_instance perim356 method edge_length
+quantity per356  energy function perim356.value^2 modulus 0
+quantity ten356  energy function 1.000000*perim356.value modulus 0
+
+method_instance ar357 method edge_area
+quantity sq_farea357 energy function ar357.value^2
+quantity farea357 energy function -2 * 1.000000 * abs(ar357.value)
+method_instance perim357 method edge_length
+quantity per357  energy function perim357.value^2 modulus 0
+quantity ten357  energy function 1.000000*perim357.value modulus 0
+
+method_instance ar358 method edge_area
+quantity sq_farea358 energy function ar358.value^2
+quantity farea358 energy function -2 * 1.000000 * abs(ar358.value)
+method_instance perim358 method edge_length
+quantity per358  energy function perim358.value^2 modulus 0
+quantity ten358  energy function 1.000000*perim358.value modulus 0
+
+method_instance ar359 method edge_area
+quantity sq_farea359 energy function ar359.value^2
+quantity farea359 energy function -2 * 1.000000 * abs(ar359.value)
+method_instance perim359 method edge_length
+quantity per359  energy function perim359.value^2 modulus 0
+quantity ten359  energy function 1.000000*perim359.value modulus 0
+
+method_instance ar360 method edge_area
+quantity sq_farea360 energy function ar360.value^2
+quantity farea360 energy function -2 * 1.000000 * abs(ar360.value)
+method_instance perim360 method edge_length
+quantity per360  energy function perim360.value^2 modulus 0
+quantity ten360  energy function 1.000000*perim360.value modulus 0
+
+method_instance ar361 method edge_area
+quantity sq_farea361 energy function ar361.value^2
+quantity farea361 energy function -2 * 1.000000 * abs(ar361.value)
+method_instance perim361 method edge_length
+quantity per361  energy function perim361.value^2 modulus 0
+quantity ten361  energy function 1.000000*perim361.value modulus 0
+
+method_instance ar362 method edge_area
+quantity sq_farea362 energy function ar362.value^2
+quantity farea362 energy function -2 * 1.000000 * abs(ar362.value)
+method_instance perim362 method edge_length
+quantity per362  energy function perim362.value^2 modulus 0
+quantity ten362  energy function 1.000000*perim362.value modulus 0
+
+method_instance ar363 method edge_area
+quantity sq_farea363 energy function ar363.value^2
+quantity farea363 energy function -2 * 1.000000 * abs(ar363.value)
+method_instance perim363 method edge_length
+quantity per363  energy function perim363.value^2 modulus 0
+quantity ten363  energy function 1.000000*perim363.value modulus 0
+
+method_instance ar364 method edge_area
+quantity sq_farea364 energy function ar364.value^2
+quantity farea364 energy function -2 * 1.000000 * abs(ar364.value)
+method_instance perim364 method edge_length
+quantity per364  energy function perim364.value^2 modulus 0
+quantity ten364  energy function 1.000000*perim364.value modulus 0
+
+method_instance ar365 method edge_area
+quantity sq_farea365 energy function ar365.value^2
+quantity farea365 energy function -2 * 1.000000 * abs(ar365.value)
+method_instance perim365 method edge_length
+quantity per365  energy function perim365.value^2 modulus 0
+quantity ten365  energy function 1.000000*perim365.value modulus 0
+
+method_instance ar366 method edge_area
+quantity sq_farea366 energy function ar366.value^2
+quantity farea366 energy function -2 * 1.000000 * abs(ar366.value)
+method_instance perim366 method edge_length
+quantity per366  energy function perim366.value^2 modulus 0
+quantity ten366  energy function 1.000000*perim366.value modulus 0
+
+method_instance ar367 method edge_area
+quantity sq_farea367 energy function ar367.value^2
+quantity farea367 energy function -2 * 1.000000 * abs(ar367.value)
+method_instance perim367 method edge_length
+quantity per367  energy function perim367.value^2 modulus 0
+quantity ten367  energy function 1.000000*perim367.value modulus 0
+
+method_instance ar368 method edge_area
+quantity sq_farea368 energy function ar368.value^2
+quantity farea368 energy function -2 * 1.000000 * abs(ar368.value)
+method_instance perim368 method edge_length
+quantity per368  energy function perim368.value^2 modulus 0
+quantity ten368  energy function 1.000000*perim368.value modulus 0
+
+method_instance ar369 method edge_area
+quantity sq_farea369 energy function ar369.value^2
+quantity farea369 energy function -2 * 1.000000 * abs(ar369.value)
+method_instance perim369 method edge_length
+quantity per369  energy function perim369.value^2 modulus 0
+quantity ten369  energy function 1.000000*perim369.value modulus 0
+
+method_instance ar370 method edge_area
+quantity sq_farea370 energy function ar370.value^2
+quantity farea370 energy function -2 * 1.000000 * abs(ar370.value)
+method_instance perim370 method edge_length
+quantity per370  energy function perim370.value^2 modulus 0
+quantity ten370  energy function 1.000000*perim370.value modulus 0
+
+method_instance ar371 method edge_area
+quantity sq_farea371 energy function ar371.value^2
+quantity farea371 energy function -2 * 1.000000 * abs(ar371.value)
+method_instance perim371 method edge_length
+quantity per371  energy function perim371.value^2 modulus 0
+quantity ten371  energy function 1.000000*perim371.value modulus 0
+
+method_instance ar372 method edge_area
+quantity sq_farea372 energy function ar372.value^2
+quantity farea372 energy function -2 * 1.000000 * abs(ar372.value)
+method_instance perim372 method edge_length
+quantity per372  energy function perim372.value^2 modulus 0
+quantity ten372  energy function 1.000000*perim372.value modulus 0
+
+method_instance ar373 method edge_area
+quantity sq_farea373 energy function ar373.value^2
+quantity farea373 energy function -2 * 1.000000 * abs(ar373.value)
+method_instance perim373 method edge_length
+quantity per373  energy function perim373.value^2 modulus 0
+quantity ten373  energy function 1.000000*perim373.value modulus 0
+
+method_instance ar374 method edge_area
+quantity sq_farea374 energy function ar374.value^2
+quantity farea374 energy function -2 * 1.000000 * abs(ar374.value)
+method_instance perim374 method edge_length
+quantity per374  energy function perim374.value^2 modulus 0
+quantity ten374  energy function 1.000000*perim374.value modulus 0
+
+method_instance ar375 method edge_area
+quantity sq_farea375 energy function ar375.value^2
+quantity farea375 energy function -2 * 1.000000 * abs(ar375.value)
+method_instance perim375 method edge_length
+quantity per375  energy function perim375.value^2 modulus 0
+quantity ten375  energy function 1.000000*perim375.value modulus 0
+
+method_instance ar376 method edge_area
+quantity sq_farea376 energy function ar376.value^2
+quantity farea376 energy function -2 * 1.000000 * abs(ar376.value)
+method_instance perim376 method edge_length
+quantity per376  energy function perim376.value^2 modulus 0
+quantity ten376  energy function 1.000000*perim376.value modulus 0
+
+method_instance ar377 method edge_area
+quantity sq_farea377 energy function ar377.value^2
+quantity farea377 energy function -2 * 1.000000 * abs(ar377.value)
+method_instance perim377 method edge_length
+quantity per377  energy function perim377.value^2 modulus 0
+quantity ten377  energy function 1.000000*perim377.value modulus 0
+
+method_instance ar378 method edge_area
+quantity sq_farea378 energy function ar378.value^2
+quantity farea378 energy function -2 * 1.000000 * abs(ar378.value)
+method_instance perim378 method edge_length
+quantity per378  energy function perim378.value^2 modulus 0
+quantity ten378  energy function 1.000000*perim378.value modulus 0
+
+method_instance ar379 method edge_area
+quantity sq_farea379 energy function ar379.value^2
+quantity farea379 energy function -2 * 1.000000 * abs(ar379.value)
+method_instance perim379 method edge_length
+quantity per379  energy function perim379.value^2 modulus 0
+quantity ten379  energy function 1.000000*perim379.value modulus 0
+
+method_instance ar380 method edge_area
+quantity sq_farea380 energy function ar380.value^2
+quantity farea380 energy function -2 * 1.000000 * abs(ar380.value)
+method_instance perim380 method edge_length
+quantity per380  energy function perim380.value^2 modulus 0
+quantity ten380  energy function 1.000000*perim380.value modulus 0
+
+method_instance ar381 method edge_area
+quantity sq_farea381 energy function ar381.value^2
+quantity farea381 energy function -2 * 1.000000 * abs(ar381.value)
+method_instance perim381 method edge_length
+quantity per381  energy function perim381.value^2 modulus 0
+quantity ten381  energy function 1.000000*perim381.value modulus 0
+
+method_instance ar382 method edge_area
+quantity sq_farea382 energy function ar382.value^2
+quantity farea382 energy function -2 * 1.000000 * abs(ar382.value)
+method_instance perim382 method edge_length
+quantity per382  energy function perim382.value^2 modulus 0
+quantity ten382  energy function 1.000000*perim382.value modulus 0
+
+method_instance ar383 method edge_area
+quantity sq_farea383 energy function ar383.value^2
+quantity farea383 energy function -2 * 1.000000 * abs(ar383.value)
+method_instance perim383 method edge_length
+quantity per383  energy function perim383.value^2 modulus 0
+quantity ten383  energy function 1.000000*perim383.value modulus 0
+
+method_instance ar384 method edge_area
+quantity sq_farea384 energy function ar384.value^2
+quantity farea384 energy function -2 * 1.000000 * abs(ar384.value)
+method_instance perim384 method edge_length
+quantity per384  energy function perim384.value^2 modulus 0
+quantity ten384  energy function 1.000000*perim384.value modulus 0
+
+method_instance ar385 method edge_area
+quantity sq_farea385 energy function ar385.value^2
+quantity farea385 energy function -2 * 1.000000 * abs(ar385.value)
+method_instance perim385 method edge_length
+quantity per385  energy function perim385.value^2 modulus 0
+quantity ten385  energy function 1.000000*perim385.value modulus 0
+
+method_instance ar386 method edge_area
+quantity sq_farea386 energy function ar386.value^2
+quantity farea386 energy function -2 * 1.000000 * abs(ar386.value)
+method_instance perim386 method edge_length
+quantity per386  energy function perim386.value^2 modulus 0
+quantity ten386  energy function 1.000000*perim386.value modulus 0
+
+method_instance ar387 method edge_area
+quantity sq_farea387 energy function ar387.value^2
+quantity farea387 energy function -2 * 1.000000 * abs(ar387.value)
+method_instance perim387 method edge_length
+quantity per387  energy function perim387.value^2 modulus 0
+quantity ten387  energy function 1.000000*perim387.value modulus 0
+
+method_instance ar388 method edge_area
+quantity sq_farea388 energy function ar388.value^2
+quantity farea388 energy function -2 * 1.000000 * abs(ar388.value)
+method_instance perim388 method edge_length
+quantity per388  energy function perim388.value^2 modulus 0
+quantity ten388  energy function 1.000000*perim388.value modulus 0
+
+method_instance ar389 method edge_area
+quantity sq_farea389 energy function ar389.value^2
+quantity farea389 energy function -2 * 1.000000 * abs(ar389.value)
+method_instance perim389 method edge_length
+quantity per389  energy function perim389.value^2 modulus 0
+quantity ten389  energy function 1.000000*perim389.value modulus 0
+
+method_instance ar390 method edge_area
+quantity sq_farea390 energy function ar390.value^2
+quantity farea390 energy function -2 * 1.000000 * abs(ar390.value)
+method_instance perim390 method edge_length
+quantity per390  energy function perim390.value^2 modulus 0
+quantity ten390  energy function 1.000000*perim390.value modulus 0
+
+method_instance ar391 method edge_area
+quantity sq_farea391 energy function ar391.value^2
+quantity farea391 energy function -2 * 1.000000 * abs(ar391.value)
+method_instance perim391 method edge_length
+quantity per391  energy function perim391.value^2 modulus 0
+quantity ten391  energy function 1.000000*perim391.value modulus 0
+
+method_instance ar392 method edge_area
+quantity sq_farea392 energy function ar392.value^2
+quantity farea392 energy function -2 * 1.000000 * abs(ar392.value)
+method_instance perim392 method edge_length
+quantity per392  energy function perim392.value^2 modulus 0
+quantity ten392  energy function 1.000000*perim392.value modulus 0
+
+method_instance ar393 method edge_area
+quantity sq_farea393 energy function ar393.value^2
+quantity farea393 energy function -2 * 1.000000 * abs(ar393.value)
+method_instance perim393 method edge_length
+quantity per393  energy function perim393.value^2 modulus 0
+quantity ten393  energy function 1.000000*perim393.value modulus 0
+
+method_instance ar394 method edge_area
+quantity sq_farea394 energy function ar394.value^2
+quantity farea394 energy function -2 * 1.000000 * abs(ar394.value)
+method_instance perim394 method edge_length
+quantity per394  energy function perim394.value^2 modulus 0
+quantity ten394  energy function 1.000000*perim394.value modulus 0
+
+method_instance ar395 method edge_area
+quantity sq_farea395 energy function ar395.value^2
+quantity farea395 energy function -2 * 1.000000 * abs(ar395.value)
+method_instance perim395 method edge_length
+quantity per395  energy function perim395.value^2 modulus 0
+quantity ten395  energy function 1.000000*perim395.value modulus 0
+
+method_instance ar396 method edge_area
+quantity sq_farea396 energy function ar396.value^2
+quantity farea396 energy function -2 * 1.000000 * abs(ar396.value)
+method_instance perim396 method edge_length
+quantity per396  energy function perim396.value^2 modulus 0
+quantity ten396  energy function 1.000000*perim396.value modulus 0
+
+method_instance ar397 method edge_area
+quantity sq_farea397 energy function ar397.value^2
+quantity farea397 energy function -2 * 1.000000 * abs(ar397.value)
+method_instance perim397 method edge_length
+quantity per397  energy function perim397.value^2 modulus 0
+quantity ten397  energy function 1.000000*perim397.value modulus 0
+
+method_instance ar398 method edge_area
+quantity sq_farea398 energy function ar398.value^2
+quantity farea398 energy function -2 * 1.000000 * abs(ar398.value)
+method_instance perim398 method edge_length
+quantity per398  energy function perim398.value^2 modulus 0
+quantity ten398  energy function 1.000000*perim398.value modulus 0
+
+method_instance ar399 method edge_area
+quantity sq_farea399 energy function ar399.value^2
+quantity farea399 energy function -2 * 1.000000 * abs(ar399.value)
+method_instance perim399 method edge_length
+quantity per399  energy function perim399.value^2 modulus 0
+quantity ten399  energy function 1.000000*perim399.value modulus 0
+
+method_instance ar400 method edge_area
+quantity sq_farea400 energy function ar400.value^2
+quantity farea400 energy function -2 * 1.000000 * abs(ar400.value)
+method_instance perim400 method edge_length
+quantity per400  energy function perim400.value^2 modulus 0
+quantity ten400  energy function 1.000000*perim400.value modulus 0
+
+
+VERTICES
+
+1 -1.321291 4.026648
+2 0.234336 -2.876899
+3 0.947478 -3.612847
+4 -5.826703 2.476310
+5 4.920871 4.824064
+6 -0.006167 1.034666
+7 0.574410 0.674938
+8 5.973031 3.285731
+9 3.075213 1.401364
+10 -1.153460 5.577399
+11 -4.478009 4.902112
+12 -3.626032 5.367330
+13 -3.135074 5.036750
+14 -2.736462 3.611726
+15 6.978661 -0.087466
+16 6.636983 0.003942
+17 6.874856 1.761356
+18 -1.014819 -2.387116
+19 -0.298121 -3.098400
+20 -0.842941 -1.930109
+21 3.962714 0.367961
+22 1.380782 -3.409701
+23 -6.152544 4.979345
+24 -8.001555 -0.646582
+25 -7.577022 0.426324
+26 -7.547879 1.232169
+27 -7.064006 1.614014
+28 -4.765388 3.552691
+29 -4.190038 4.223612
+30 -3.275347 3.606862
+31 -3.631156 4.121786
+32 -3.673417 3.035152
+33 -4.554739 3.156801
+34 -5.626314 2.253874
+35 -4.823930 2.427177
+36 -6.146101 4.346756
+37 -5.833247 3.196221
+38 -5.405302 4.114222
+39 -5.229468 3.698436
+40 -2.598892 6.525881
+41 1.734673 6.702863
+42 1.694232 6.858070
+43 5.743285 5.725268
+44 5.316631 4.884086
+45 3.819291 5.091905
+46 4.630333 5.098775
+47 1.896867 7.324111
+48 5.206515 0.391197
+49 4.682945 3.850403
+50 5.016244 3.413820
+51 0.867679 1.775350
+52 1.034339 1.152363
+53 1.760123 1.013111
+54 0.262947 5.764748
+55 0.380614 5.213518
+56 0.666428 6.258837
+57 1.318790 6.103075
+58 1.520671 5.630843
+59 1.418230 5.345514
+60 -0.487720 6.087903
+61 -1.099125 5.697855
+62 -0.438242 6.646132
+63 -3.778153 6.152079
+64 -3.248347 6.622270
+65 0.468076 1.915694
+66 0.268213 2.401979
+67 -0.039423 1.440576
+68 -0.223050 3.364360
+69 0.387040 2.762173
+70 -0.920444 2.752561
+71 -0.601764 2.278315
+72 -0.656187 1.804178
+73 -2.388543 5.704762
+74 -2.964986 5.046351
+75 -1.564018 5.389977
+76 -1.790047 4.487763
+77 -2.390543 4.389104
+78 6.191654 3.433902
+79 4.017249 -5.102157
+80 6.404309 -4.479915
+81 7.194533 -0.627561
+82 7.172500 -3.221133
+83 7.415467 1.374781
+84 8.234903 0.713220
+85 7.490229 0.376117
+86 7.964153 0.336830
+87 -4.391927 -4.830562
+88 -4.453874 -5.297248
+89 -4.241222 -6.287912
+90 -4.057240 -6.812867
+91 -2.876440 -7.796933
+92 -2.116513 -7.724121
+93 3.466338 -6.561383
+94 -2.079821 -7.582331
+95 -4.800636 0.144253
+96 -3.664050 0.709979
+97 -2.270187 0.855900
+98 -1.229762 1.385785
+99 -1.621369 1.469020
+100 -0.749752 0.578507
+101 -0.769216 0.469481
+102 -0.416025 -3.447161
+103 0.445767 -2.372088
+104 -0.051354 -1.739852
+105 3.256391 -1.463990
+106 1.539595 -2.828897
+107 0.961701 -2.251519
+108 1.297702 -1.616016
+109 2.061058 -3.834244
+110 -0.103648 -4.578257
+111 0.734830 -4.109826
+112 0.164876 -4.219008
+113 -0.661034 -5.516612
+114 -0.037607 -5.221702
+115 0.463389 -5.524796
+116 -5.898719 5.806782
+117 -6.251284 5.056948
+118 -5.580780 5.155471
+119 -4.498014 4.910976
+120 -5.152591 4.724787
+121 -8.075244 0.394016
+122 -7.317237 0.165249
+123 -7.147345 -0.812137
+124 -7.370611 -0.547451
+125 -5.922592 -0.389146
+126 -3.633112 0.831784
+127 -2.968893 1.173780
+128 -4.317200 1.468285
+129 -4.279588 1.872194
+130 -3.010210 2.135381
+131 -3.466356 2.350651
+132 -6.528307 3.575209
+133 -6.564117 4.014568
+134 -6.869771 4.188329
+135 -0.058964 6.952483
+136 0.570230 6.732594
+137 0.875778 7.075865
+138 5.882712 4.665537
+139 6.260462 4.057620
+140 6.367702 5.081319
+141 3.385230 5.690450
+142 2.387889 6.356610
+143 3.011785 6.806788
+144 3.569786 6.338244
+145 2.369534 5.809746
+146 2.631636 5.515397
+147 3.002596 6.907990
+148 3.305981 7.365233
+149 2.372497 7.720778
+150 2.304696 7.489092
+151 4.023943 6.448659
+152 4.646839 5.934897
+153 5.089126 6.239323
+154 4.195394 0.983933
+155 4.500267 1.010292
+156 3.768683 1.476386
+157 4.056487 2.332073
+158 4.630176 2.428891
+159 5.909239 2.246328
+160 6.690756 1.722209
+161 5.195449 1.939682
+162 5.164718 1.646459
+163 6.136585 0.866262
+164 5.841855 0.878036
+165 -1.256127 7.149695
+166 -2.064917 6.975603
+167 -1.698796 6.933349
+168 1.737843 4.654717
+169 2.530065 4.976479
+170 3.221860 4.316058
+171 1.473969 2.226441
+172 2.657380 1.914470
+173 1.979386 1.751548
+174 -3.467482 7.125093
+175 -0.692603 4.172652
+176 -0.202790 3.671804
+177 -0.484331 4.785595
+178 0.303547 5.035917
+179 0.964541 3.000115
+180 1.481630 2.448026
+181 1.712041 4.580215
+182 1.817982 4.229222
+183 0.671458 4.333579
+184 0.586157 3.998229
+185 1.557323 3.606141
+186 1.065506 3.411706
+187 -1.546896 3.383017
+188 -1.174412 2.804440
+189 -2.406126 3.270019
+190 -2.499851 2.403355
+191 -1.830749 2.115047
+192 6.811315 3.219286
+193 7.195455 2.466480
+194 6.009475 -5.555101
+195 7.579659 -1.979488
+196 7.635441 -0.884078
+197 7.987738 0.313839
+198 8.068118 0.444015
+199 8.167187 0.578268
+200 -3.826601 -5.830559
+201 -3.872859 -5.602595
+202 -4.725565 -4.459593
+203 -3.164286 -7.399622
+204 -4.922539 -5.575809
+205 -4.859161 -6.123717
+206 -4.996695 -6.273914
+207 -4.111501 -6.906362
+208 3.213801 -7.589648
+209 3.330796 -7.534113
+210 3.531486 -7.354304
+211 3.436966 -7.455355
+212 4.451384 -5.726628
+213 4.340639 -6.167260
+214 5.385281 -5.482794
+215 3.613751 -7.232251
+216 3.661873 -7.134497
+217 -5.622761 -2.571353
+218 -5.644940 -1.038304
+219 -4.795301 -2.031715
+220 -4.855317 -1.271552
+221 -6.667800 -3.502588
+222 -3.478102 -1.296407
+223 -4.532843 -0.989396
+224 -4.469877 -0.499355
+225 -3.444618 -0.085002
+226 -3.105579 -0.363205
+227 -2.498488 -0.290250
+228 -2.127727 0.202381
+229 -1.312735 0.018520
+230 -2.044122 -1.261953
+231 -1.298042 -1.189179
+232 -1.070835 -0.797322
+233 -1.533062 -2.635360
+234 -4.359198 -3.892512
+235 -4.516624 -3.388212
+236 -1.078022 -3.802832
+237 -1.632668 -3.511156
+238 -2.049253 -3.714151
+239 -0.992823 -4.438185
+240 -1.279016 -4.842902
+241 3.367141 0.082719
+242 3.418350 -0.613563
+243 3.238064 -0.818939
+244 2.274708 -0.740617
+245 2.222284 -0.660096
+246 -0.115436 -0.681827
+247 0.184526 -1.130210
+248 -0.003591 -0.186754
+249 0.625680 0.212949
+250 1.055381 -0.045033
+251 0.997675 -1.079057
+252 1.208053 -0.667208
+253 4.474020 -2.684126
+254 3.725912 -1.760075
+255 4.662623 -4.231911
+256 4.593476 -4.028241
+257 6.096546 -4.289147
+258 5.472808 -4.611379
+259 5.035091 -3.213243
+260 6.121798 -3.307993
+261 5.559963 -3.088830
+262 6.895645 -3.059565
+263 6.406560 -3.123073
+264 7.252528 -2.071022
+265 6.530357 -1.579908
+266 6.164227 -1.636640
+267 5.825241 -1.524044
+268 5.401460 -1.805197
+269 4.372912 -0.864337
+270 4.801280 -1.811317
+271 4.406129 -1.484827
+272 5.667893 -0.591046
+273 5.128166 -0.289661
+274 4.715716 -0.410471
+275 1.947113 -2.647480
+276 2.118842 -4.445286
+277 3.450448 -5.032764
+278 3.173520 -4.480080
+279 1.132024 -4.677857
+280 0.913525 -5.328942
+281 2.009532 -4.595889
+282 0.363967 -6.288219
+283 -4.800109 5.754803
+284 -4.394620 6.243544
+285 -5.412456 5.750605
+286 -6.897528 4.301689
+287 -8.282316 0.717326
+288 -8.273145 0.064978
+289 -8.147663 1.224946
+290 -8.237152 1.106388
+291 -6.898546 2.423444
+292 -7.112015 2.105925
+293 -7.617087 3.085238
+294 -7.038034 3.104520
+295 -7.962091 2.111110
+296 -8.294702 -0.065148
+297 -8.080153 -0.572106
+298 -8.177337 -0.450026
+299 -8.162344 -1.227153
+300 -5.100139 0.318070
+301 -5.863709 -0.067409
+302 -5.102469 1.048294
+303 -6.435176 0.483388
+304 -6.379235 1.187562
+305 -5.717599 1.525377
+306 -7.383038 3.835181
+307 -7.490911 3.171991
+308 -7.360920 3.235047
+309 -2.852302 7.731502
+310 0.852208 7.538839
+311 1.325716 7.964858
+312 1.348724 7.887135
+313 1.353743 7.918337
+314 3.405592 7.387300
+315 2.757114 7.851111
+316 5.711807 5.802240
+317 5.460340 6.096343
+318 1.460877 7.999003
+319 -2.245103 7.598355
+320 -0.945704 7.746445
+321 -0.109054 7.548203
+322 0.233260 7.885719
+323 3.666561 3.666573
+324 3.226988 4.092509
+325 2.666325 3.832567
+326 3.541014 2.823680
+327 2.784420 2.578234
+328 2.292868 3.018509
+329 2.297841 2.986898
+330 -4.513982 6.755652
+331 7.732117 3.131830
+332 7.751901 2.998984
+333 7.470554 3.443972
+334 8.243510 -0.323888
+335 8.088086 -0.700504
+336 5.706184 -5.617248
+337 5.865849 -5.595742
+338 8.173128 -1.625736
+339 8.212589 -1.499885
+340 8.097440 -1.743333
+341 7.699976 -2.021043
+342 7.253073 -3.767670
+343 7.258799 -3.627016
+344 7.207440 -3.322675
+345 7.243341 -3.478203
+346 7.767587 -2.865614
+347 7.674725 -2.969127
+348 7.242875 -3.202042
+349 8.164997 0.064129
+350 8.088094 0.190607
+351 7.873232 1.491852
+352 -3.237275 -6.118085
+353 -2.566144 -7.005895
+354 -3.021906 -7.050759
+355 -3.288666 -6.749210
+356 -3.481359 -5.079552
+357 -3.796866 -4.664780
+358 -3.689547 -4.158548
+359 -3.358157 -3.962490
+360 -6.283673 -4.597504
+361 -5.115785 -4.479049
+362 -5.581514 -5.287378
+363 -5.429978 -5.257880
+364 -5.617003 -2.878158
+365 -5.177485 -3.372636
+366 -5.453967 -4.106162
+367 -6.496399 -3.553040
+368 -6.121617 -4.176513
+369 -3.150023 -7.439033
+370 -3.292898 -7.448388
+371 -4.336733 -6.953719
+372 -4.168930 -6.924570
+373 -4.742381 -6.861654
+374 -1.215910 -8.087559
+375 -1.074810 -8.002051
+376 -1.622729 -8.158010
+377 -1.747504 -8.116814
+378 -2.070255 -7.808006
+379 -2.490922 -7.876222
+380 -2.191456 -7.770316
+381 -2.344206 -7.838493
+382 3.086997 -7.621431
+383 2.951572 -7.629347
+384 2.808840 -7.613694
+385 2.724937 -7.591943
+386 2.692440 -7.666948
+387 -7.107035 -3.834748
+388 -7.095006 -3.788204
+389 -7.104231 -1.188015
+390 -6.158071 -1.608600
+391 -6.133632 -2.166916
+392 -2.258727 -1.566123
+393 -2.168222 -2.307428
+394 -3.367536 -1.531384
+395 2.822521 0.872607
+396 2.995781 0.284504
+397 2.288378 -0.133889
+398 1.837847 0.888731
+399 1.763193 0.353344
+400 2.100461 -2.237068
+401 2.226467 -1.259335
+402 1.768430 -1.663173
+403 2.816099 -1.694226
+404 2.707882 -2.096324
+405 3.752395 -3.643945
+406 3.367399 -3.826771
+407 3.072299 -2.588059
+408 2.674465 -3.338142
+409 2.662632 -3.140884
+410 3.597423 -2.545382
+411 3.870701 -2.794187
+412 2.202787 -5.447118
+413 3.097016 -6.418349
+414 2.928271 -5.654446
+415 1.665700 -5.869162
+416 2.265024 -8.031169
+417 2.390016 -7.991668
+418 2.604849 -7.807710
+419 2.503724 -7.916701
+420 2.130350 -8.034655
+421 1.987830 -8.002495
+422 -1.364634 -7.276485
+423 -0.306949 -6.533103
+424 -0.840795 -6.077935
+425 0.857617 -7.364503
+426 0.903050 -6.719240
+427 1.630469 -6.338415
+428 2.349196 -6.975544
+429 2.354270 -6.937169
+430 -6.853742 4.736913
+431 -6.779969 4.845037
+432 -6.677489 4.932070
+433 -6.025855 5.748379
+434 -6.248295 5.421994
+435 -4.858013 6.577223
+436 -6.897918 4.609041
+437 -6.912330 4.463235
+438 -8.126681 0.447238
+439 -8.222247 0.582166
+440 -8.140820 0.319854
+441 -8.221494 0.193750
+442 -7.986712 1.359610
+443 -8.023679 1.335506
+444 -8.041690 1.468673
+445 -8.305177 0.850932
+446 -8.290052 0.981192
+447 -7.829911 2.749669
+448 -7.787927 2.873118
+449 -7.716634 2.985341
+450 -8.085105 1.608227
+451 -8.099132 1.743698
+452 -8.037281 1.996471
+453 -8.083181 1.873581
+454 -7.858863 2.216429
+455 -7.778877 2.326377
+456 -7.760760 2.288525
+457 -8.246314 -0.323999
+458 -8.285701 -0.195263
+459 -8.069551 -1.473762
+460 -8.128879 -1.353016
+461 -8.035969 -0.695990
+462 -8.105592 -0.830483
+463 -8.169511 -1.097303
+464 -8.150424 -0.964666
+465 -7.435981 3.570707
+466 -7.424503 3.709814
+467 -7.417886 3.419692
+468 -7.371277 3.258808
+469 -7.311849 3.945259
+470 -7.211876 4.038844
+471 -6.932455 4.173677
+472 -7.084697 4.115120
+473 -7.125794 -3.990636
+474 -7.119629 -4.135409
+475 -7.087992 -4.267318
+476 -6.501354 -4.801974
+477 -6.478582 -4.707193
+478 -6.563638 -4.690445
+479 -6.842334 -4.571902
+480 -6.713391 -4.639910
+481 -6.010410 -5.555966
+482 -5.821284 -5.564195
+483 -5.833802 -5.565171
+484 -5.808513 -5.717982
+485 -6.518856 -4.975034
+486 -6.507145 -5.129820
+487 -6.393782 -5.374535
+488 -6.465455 -5.263708
+489 -3.095013 7.641221
+490 -2.978443 7.698805
+491 6.366598 5.183225
+492 6.788371 4.851042
+493 6.432308 5.070822
+494 4.107177 7.071022
+495 4.023709 7.184850
+496 3.813464 7.341230
+497 3.925542 7.275305
+498 3.688541 7.381930
+499 3.552082 7.397193
+500 3.285138 7.430835
+501 3.210852 7.582684
+502 3.119919 7.702712
+503 2.457004 7.768975
+504 2.611505 7.827662
+505 5.559472 6.014203
+506 5.643480 5.915892
+507 5.220059 6.210010
+508 5.346872 6.161724
+509 2.332748 7.800178
+510 2.237669 7.934177
+511 2.130464 8.035086
+512 1.748633 8.122056
+513 1.606802 8.077940
+514 0.316979 8.067657
+515 0.232843 7.976616
+516 -4.572584 6.539513
+517 -4.561708 6.600242
+518 -4.691032 6.564459
+519 -4.449408 6.890915
+520 -4.368147 7.004091
+521 -4.157909 7.158365
+522 -4.270703 7.093614
+523 -3.200980 7.559372
+524 -3.295516 7.454310
+525 -3.448094 7.180639
+526 -3.378012 7.327474
+527 -4.030909 7.197705
+528 -3.891118 7.211506
+529 -3.579872 7.164448
+530 -3.740173 7.200139
+531 7.150832 4.153533
+532 7.047838 4.243144
+533 6.862048 4.339588
+534 6.921503 4.316641
+535 6.879741 4.442193
+536 7.321129 3.515556
+537 7.287977 3.525826
+538 7.229067 4.048472
+539 7.281603 3.928940
+540 7.677998 3.251212
+541 7.590285 3.355630
+542 8.217093 -0.064538
+543 8.243433 -0.194267
+544 8.217284 -0.452225
+545 8.165183 -0.578126
+546 7.225751 -3.898804
+547 7.176767 -4.019183
+548 7.015339 -4.223578
+549 7.106414 -4.127734
+550 6.467714 -4.470112
+551 6.629067 -4.429401
+552 6.904525 -4.306052
+553 6.775253 -4.374726
+554 6.135227 -5.495168
+555 6.241552 -5.416143
+556 6.391438 -5.203448
+557 6.327234 -5.318596
+558 6.431094 -4.595728
+559 6.452985 -4.766249
+560 6.433737 -5.071949
+561 6.454122 -4.925630
+562 8.007961 -0.947805
+563 7.987286 -0.818362
+564 7.932551 -0.868463
+565 8.215114 -1.367370
+566 7.831996 -2.750401
+567 7.867034 -2.624641
+568 7.848441 -2.347182
+569 7.872405 -2.489715
+570 7.796077 -2.198721
+571 7.716798 -2.046072
+572 7.987144 -1.851321
+573 7.844667 -1.948625
+574 7.554908 -3.060053
+575 7.410148 -3.137793
+576 7.623566 2.565479
+577 8.269555 0.847282
+578 7.990550 1.720320
+579 7.925979 1.576575
+580 8.169284 1.228197
+581 -2.696698 -5.764066
+582 -2.986429 -5.090449
+583 -1.698977 -4.946173
+584 -2.272648 -4.443037
+585 -2.656966 -4.551217
+586 -2.981513 -7.706740
+587 -3.072930 -7.586701
+588 -3.593458 -7.483359
+589 -3.448992 -7.481442
+590 -5.114565 -6.282261
+591 -3.724250 -7.453395
+592 -3.839611 -7.391566
+593 -4.081251 -7.026389
+594 -4.489764 -6.953416
+595 -4.625653 -6.922779
+596 -4.994138 -6.335034
+597 -4.964481 -6.505029
+598 -4.838374 -6.770645
+599 -4.912576 -6.651097
+600 -1.491502 -8.166687
+601 -1.355356 -8.142933
+602 -1.864440 -8.043744
+603 -1.972343 -7.940147
+604 -2.758725 -7.855699
+605 -2.629690 -7.882168
+606 5.114643 -6.487894
+607 5.332578 -6.343868
+608 5.232935 -6.427657
+609 5.532524 -5.620118
+610 5.529550 -5.619878
+611 5.412545 -6.237406
+612 5.472217 -6.109603
+613 -3.536555 -2.103849
+614 -4.160144 -2.455072
+615 -4.162011 -2.969940
+616 -2.785579 -2.724173
+617 -2.856810 -3.186732
+618 -3.247490 -3.448970
+619 -0.992600 -7.483454
+620 -0.837272 -8.171848
+621 -1.043124 -7.976556
+622 -0.955631 -8.074087
+623 -0.423695 -7.278773
+624 -0.005404 -7.575398
+625 -0.324606 -8.261773
+626 -0.193410 -8.207039
+627 -0.010440 -8.075869
+628 -0.063799 -8.122913
+629 -6.393336 5.040099
+630 -6.547880 4.997184
+631 -6.201747 5.554748
+632 -6.127345 5.664060
+633 -6.258284 5.095044
+634 -6.266932 5.267907
+635 -5.142301 6.522978
+636 -5.009183 6.563602
+637 -5.488053 5.836885
+638 -5.416645 6.242130
+639 -7.824873 2.474682
+640 -7.842158 2.616342
+641 -6.948628 -4.486672
+642 -7.030836 -4.384828
+643 -6.292909 -5.460708
+644 -6.164376 -5.521276
+645 0.450060 8.177960
+646 5.812733 5.722136
+647 5.965346 5.690658
+648 6.202619 5.555529
+649 6.095982 5.635068
+650 6.283763 5.452772
+651 6.338514 5.328078
+652 6.879648 4.596834
+653 6.849253 4.733810
+654 6.697585 4.946913
+655 6.578225 5.020343
+656 2.891633 7.838114
+657 3.013108 7.788409
+658 4.733282 6.848489
+659 4.206884 6.842972
+660 4.280939 6.864257
+661 4.175449 6.935398
+662 5.088827 6.250648
+663 4.847838 6.783888
+664 4.941394 6.690113
+665 1.884399 8.129854
+666 2.012235 8.100744
+667 -2.717792 7.739137
+668 -2.576251 7.721990
+669 -2.277842 7.616585
+670 -2.429109 7.680770
+671 -0.977499 7.877312
+672 -1.066416 7.939556
+673 0.063998 8.148259
+674 0.189226 8.029526
+675 7.308016 3.796210
+676 7.308403 3.651802
+677 8.111218 -1.089473
+678 8.180937 -1.229949
+679 7.886165 2.358463
+680 7.737471 2.854504
+681 7.689797 2.700464
+682 8.027483 1.860671
+683 8.035714 1.996082
+684 7.964664 2.246267
+685 8.014743 2.125071
+686 8.236535 1.106305
+687 8.270163 0.978838
+688 7.940138 1.450127
+689 8.069792 1.343182
+690 -1.875616 -5.515942
+691 -2.473945 -5.835784
+692 -2.245295 -6.530507
+693 -1.205231 -6.167431
+694 -1.515045 -6.607065
+695 -5.772864 -5.864263
+696 -5.714927 -5.990787
+697 -5.533526 -6.178053
+698 -5.634917 -6.095819
+699 -5.411902 -6.236665
+700 -5.271610 -6.271337
+701 -3.938143 -7.298660
+702 -4.018868 -7.176204
+703 4.828031 -6.536631
+704 4.979101 -6.524186
+705 5.511397 -5.962196
+706 5.530303 -5.797252
+707 4.551898 -6.812397
+708 4.398857 -7.053333
+709 4.485062 -6.946135
+710 3.716646 -7.154849
+711 3.880919 -7.192604
+712 4.293992 -7.132296
+713 -7.066981 -2.689162
+714 -6.995534 -2.503928
+715 -7.425998 -1.708428
+716 0.063933 -8.140042
+717 0.456361 -8.292443
+718 1.839453 -7.935942
+719 0.836365 -8.163002
+720 -0.456000 -8.285887
+721 -5.463235 6.099575
+722 -5.487106 5.935917
+723 -5.747998 5.839004
+724 -5.576261 5.845429
+725 -5.255475 6.455343
+726 -5.347245 6.361316
+727 1.217740 8.099732
+728 1.101702 8.202267
+729 0.850587 8.301806
+730 0.978835 8.270133
+731 0.718568 8.296652
+732 0.584483 8.254969
+733 4.447685 6.888248
+734 4.599242 6.883252
+735 5.012952 6.568541
+736 5.062062 6.421195
+737 -0.939396 7.936919
+738 7.649443 2.552047
+739 7.780503 2.460650
+740 4.599119 -6.654371
+741 4.663405 -6.525799
+742 4.620280 -6.517688
+743 4.033295 -7.201966
+744 4.171618 -7.181967
+745 0.325028 -8.272506
+746 0.193746 -8.221315
+747 0.713417 -8.237180
+748 0.586299 -8.280610
+749 1.372707 -8.247179
+750 1.499698 -8.211563
+751 0.926185 -7.439111
+752 1.618646 -8.137483
+753 1.239379 -8.243659
+754 1.720689 -7.587138
+755 1.101584 -8.201389
+756 1.805072 -7.913600
+757 1.728088 -8.026630
+758 0.920708 -8.088783
+759 0.961277 -8.121784
+760 -0.713707 -8.240530
+761 -0.586169 -8.278785
+762 -2.174977 7.711887
+763 -2.077328 7.834680
+764 -1.857032 8.011783
+765 -1.971100 7.935146
+766 -1.477445 8.089721
+767 -1.736021 8.063475
+768 -1.609108 8.089533
+769 -0.064694 8.236941
+770 -0.584916 8.261082
+771 -0.457097 8.305819
+772 -0.708764 8.183453
+773 -0.827310 8.074624
+774 -7.219897 -3.750436
+775 -7.366237 -3.680700
+776 -7.570007 -3.489821
+777 -7.483668 -3.593606
+778 -7.587180 -2.935259
+779 -7.541370 -2.835278
+780 -7.603239 -2.804983
+781 -7.631828 -3.091209
+782 -7.734215 -2.716063
+783 -7.838159 -2.615008
+784 -7.913270 -2.502639
+785 -7.985249 -1.588365
+786 -7.797165 -1.757462
+787 -7.836544 -1.816413
+788 -7.877283 -1.695935
+789 -7.956699 -2.109680
+790 -7.910836 -1.965062
+791 -1.204828 8.013850
+792 -1.342262 8.064269
+793 -0.326764 8.316701
+794 -0.195448 8.293540
+795 -7.623791 -3.370443
+796 -7.644348 -3.236963
+797 -7.972780 -2.248557
+798 -7.958335 -2.380047
+
+EDGES
+
+1 11 12 tension 0
+2 11 29 tension 0
+3 12 13 tension 0
+4 13 31 tension 0
+5 29 31 tension 0
+6 28 33 tension 0
+7 28 29 tension 0
+8 30 31 tension 0
+9 30 32 tension 0
+10 32 33 tension 0
+11 4 37 tension 0
+12 4 34 tension 0
+13 28 39 tension 0
+14 33 35 tension 0
+15 34 35 tension 0
+16 37 39 tension 0
+17 54 55 tension 0
+18 54 56 tension 0
+19 55 59 tension 0
+20 56 57 tension 0
+21 57 58 tension 0
+22 58 59 tension 0
+23 6 67 tension 0
+24 6 7 tension 0
+25 7 52 tension 0
+26 51 52 tension 0
+27 51 65 tension 0
+28 65 67 tension 0
+29 66 71 tension 0
+30 66 69 tension 0
+31 68 69 tension 0
+32 68 70 tension 0
+33 70 71 tension 0
+34 65 66 tension 0
+35 67 72 tension 0
+36 71 72 tension 0
+37 73 75 tension 0
+38 73 74 tension 0
+39 74 77 tension 0
+40 75 76 tension 0
+41 76 77 tension 0
+42 12 63 tension 0
+43 13 74 tension 0
+44 40 64 tension 0
+45 40 73 tension 0
+46 63 64 tension 0
+47 14 77 tension 0
+48 14 30 tension 0
+49 6 100 tension 0
+50 72 98 tension 0
+51 98 100 tension 0
+52 2 103 tension 0
+53 2 19 tension 0
+54 18 19 tension 0
+55 18 20 tension 0
+56 20 104 tension 0
+57 103 104 tension 0
+58 2 3 tension 0
+59 3 22 tension 0
+60 22 106 tension 0
+61 103 107 tension 0
+62 106 107 tension 0
+63 3 111 tension 0
+64 19 102 tension 0
+65 102 112 tension 0
+66 111 112 tension 0
+67 23 118 tension 0
+68 23 36 tension 0
+69 36 38 tension 0
+70 38 120 tension 0
+71 118 120 tension 0
+72 11 119 tension 0
+73 38 39 tension 0
+74 119 120 tension 0
+75 126 127 tension 0
+76 126 128 tension 0
+77 127 130 tension 0
+78 128 129 tension 0
+79 129 131 tension 0
+80 130 131 tension 0
+81 32 131 tension 0
+82 35 129 tension 0
+83 36 133 tension 0
+84 37 132 tension 0
+85 132 133 tension 0
+86 54 60 tension 0
+87 56 136 tension 0
+88 60 62 tension 0
+89 62 135 tension 0
+90 135 136 tension 0
+91 41 42 tension 0
+92 41 57 tension 0
+93 42 137 tension 0
+94 136 137 tension 0
+95 5 44 tension 0
+96 5 49 tension 0
+97 8 50 tension 0
+98 8 78 tension 0
+99 44 138 tension 0
+100 49 50 tension 0
+101 78 139 tension 0
+102 138 139 tension 0
+103 141 144 tension 0
+104 141 146 tension 0
+105 142 143 tension 0
+106 142 145 tension 0
+107 143 144 tension 0
+108 145 146 tension 0
+109 41 142 tension 0
+110 58 145 tension 0
+111 42 47 tension 0
+112 47 150 tension 0
+113 143 147 tension 0
+114 147 150 tension 0
+115 45 141 tension 0
+116 45 46 tension 0
+117 46 152 tension 0
+118 144 151 tension 0
+119 151 152 tension 0
+120 159 161 tension 0
+121 159 160 tension 0
+122 160 163 tension 0
+123 161 162 tension 0
+124 162 164 tension 0
+125 163 164 tension 0
+126 8 159 tension 0
+127 50 158 tension 0
+128 158 161 tension 0
+129 15 85 tension 0
+130 15 16 tension 0
+131 16 163 tension 0
+132 17 83 tension 0
+133 17 160 tension 0
+134 83 85 tension 0
+135 154 156 tension 0
+136 154 155 tension 0
+137 155 162 tension 0
+138 156 157 tension 0
+139 157 158 tension 0
+140 48 164 tension 0
+141 48 155 tension 0
+142 60 61 tension 0
+143 61 167 tension 0
+144 62 165 tension 0
+145 165 167 tension 0
+146 10 61 tension 0
+147 10 75 tension 0
+148 40 166 tension 0
+149 166 167 tension 0
+150 59 168 tension 0
+151 146 169 tension 0
+152 168 169 tension 0
+153 45 170 tension 0
+154 169 170 tension 0
+155 51 171 tension 0
+156 52 53 tension 0
+157 53 173 tension 0
+158 171 173 tension 0
+159 1 76 tension 0
+160 1 175 tension 0
+161 10 177 tension 0
+162 175 177 tension 0
+163 55 178 tension 0
+164 177 178 tension 0
+165 69 179 tension 0
+166 171 180 tension 0
+167 179 180 tension 0
+168 181 182 tension 0
+169 181 183 tension 0
+170 182 185 tension 0
+171 183 184 tension 0
+172 184 186 tension 0
+173 185 186 tension 0
+174 168 181 tension 0
+175 178 183 tension 0
+176 175 176 tension 0
+177 176 184 tension 0
+178 68 176 tension 0
+179 179 186 tension 0
+180 187 189 tension 0
+181 187 188 tension 0
+182 188 191 tension 0
+183 189 190 tension 0
+184 190 191 tension 0
+185 1 187 tension 0
+186 14 189 tension 0
+187 70 188 tension 0
+188 98 99 tension 0
+189 99 191 tension 0
+190 130 190 tension 0
+191 97 99 tension 0
+192 97 127 tension 0
+193 17 193 tension 0
+194 78 192 tension 0
+195 192 193 tension 0
+196 198 199 tension 0
+197 86 198 tension 0
+198 86 197 tension 0
+199 84 199 tension 0
+200 88 204 tension 0
+201 88 201 tension 0
+202 89 205 tension 0
+203 89 200 tension 0
+204 200 201 tension 0
+205 204 205 tension 0
+206 208 209 tension 0
+207 210 211 tension 0
+208 209 211 tension 0
+209 210 215 tension 0
+210 222 226 tension 0
+211 222 223 tension 0
+212 223 224 tension 0
+213 224 225 tension 0
+214 225 226 tension 0
+215 95 224 tension 0
+216 95 96 tension 0
+217 96 225 tension 0
+218 227 230 tension 0
+219 227 228 tension 0
+220 228 229 tension 0
+221 229 232 tension 0
+222 230 231 tension 0
+223 231 232 tension 0
+224 96 126 tension 0
+225 97 228 tension 0
+226 226 227 tension 0
+227 100 101 tension 0
+228 101 229 tension 0
+229 102 236 tension 0
+230 110 112 tension 0
+231 110 239 tension 0
+232 236 239 tension 0
+233 18 233 tension 0
+234 233 237 tension 0
+235 236 237 tension 0
+236 110 114 tension 0
+237 113 114 tension 0
+238 113 240 tension 0
+239 239 240 tension 0
+240 246 247 tension 0
+241 246 248 tension 0
+242 247 251 tension 0
+243 248 249 tension 0
+244 249 250 tension 0
+245 250 252 tension 0
+246 251 252 tension 0
+247 20 231 tension 0
+248 104 247 tension 0
+249 232 246 tension 0
+250 101 248 tension 0
+251 107 108 tension 0
+252 108 251 tension 0
+253 7 249 tension 0
+254 255 258 tension 0
+255 255 256 tension 0
+256 256 259 tension 0
+257 257 258 tension 0
+258 257 260 tension 0
+259 259 261 tension 0
+260 260 261 tension 0
+261 79 212 tension 0
+262 79 255 tension 0
+263 212 214 tension 0
+264 214 258 tension 0
+265 262 264 tension 0
+266 262 263 tension 0
+267 263 266 tension 0
+268 264 265 tension 0
+269 265 266 tension 0
+270 81 196 tension 0
+271 81 265 tension 0
+272 195 196 tension 0
+273 195 264 tension 0
+274 267 268 tension 0
+275 267 272 tension 0
+276 268 270 tension 0
+277 269 271 tension 0
+278 269 274 tension 0
+279 270 271 tension 0
+280 272 273 tension 0
+281 273 274 tension 0
+282 260 263 tension 0
+283 261 268 tension 0
+284 266 267 tension 0
+285 15 81 tension 0
+286 16 272 tension 0
+287 253 270 tension 0
+288 253 259 tension 0
+289 105 243 tension 0
+290 105 254 tension 0
+291 242 243 tension 0
+292 242 269 tension 0
+293 254 271 tension 0
+294 21 241 tension 0
+295 21 274 tension 0
+296 241 242 tension 0
+297 48 273 tension 0
+298 21 154 tension 0
+299 111 279 tension 0
+300 114 115 tension 0
+301 115 280 tension 0
+302 279 280 tension 0
+303 22 109 tension 0
+304 109 276 tension 0
+305 276 281 tension 0
+306 279 281 tension 0
+307 118 285 tension 0
+308 119 283 tension 0
+309 283 285 tension 0
+310 63 284 tension 0
+311 283 284 tension 0
+312 289 290 tension 0
+313 4 291 tension 0
+314 132 294 tension 0
+315 291 294 tension 0
+316 288 296 tension 0
+317 297 298 tension 0
+318 300 301 tension 0
+319 300 302 tension 0
+320 301 303 tension 0
+321 302 305 tension 0
+322 303 304 tension 0
+323 304 305 tension 0
+324 95 300 tension 0
+325 125 301 tension 0
+326 125 218 tension 0
+327 218 220 tension 0
+328 220 223 tension 0
+329 128 302 tension 0
+330 122 303 tension 0
+331 122 124 tension 0
+332 123 124 tension 0
+333 123 125 tension 0
+334 34 305 tension 0
+335 25 122 tension 0
+336 25 26 tension 0
+337 26 27 tension 0
+338 27 304 tension 0
+339 27 292 tension 0
+340 291 292 tension 0
+341 293 307 tension 0
+342 47 312 tension 0
+343 137 310 tension 0
+344 310 312 tension 0
+345 311 313 tension 0
+346 313 318 tension 0
+347 135 321 tension 0
+348 165 320 tension 0
+349 320 321 tension 0
+350 310 322 tension 0
+351 321 322 tension 0
+352 323 326 tension 0
+353 323 324 tension 0
+354 324 325 tension 0
+355 325 328 tension 0
+356 326 327 tension 0
+357 327 329 tension 0
+358 328 329 tension 0
+359 49 323 tension 0
+360 157 326 tension 0
+361 5 46 tension 0
+362 170 324 tension 0
+363 182 325 tension 0
+364 185 328 tension 0
+365 9 172 tension 0
+366 9 156 tension 0
+367 172 327 tension 0
+368 172 173 tension 0
+369 180 329 tension 0
+370 331 332 tension 0
+371 336 337 tension 0
+372 194 337 tension 0
+373 338 339 tension 0
+374 338 340 tension 0
+375 342 343 tension 0
+376 344 345 tension 0
+377 343 345 tension 0
+378 346 347 tension 0
+379 82 348 tension 0
+380 82 344 tension 0
+381 349 350 tension 0
+382 197 350 tension 0
+383 89 90 tension 0
+384 90 355 tension 0
+385 200 352 tension 0
+386 352 355 tension 0
+387 87 88 tension 0
+388 87 357 tension 0
+389 201 356 tension 0
+390 356 357 tension 0
+391 87 202 tension 0
+392 202 234 tension 0
+393 234 358 tension 0
+394 357 358 tension 0
+395 202 361 tension 0
+396 204 363 tension 0
+397 361 363 tension 0
+398 364 367 tension 0
+399 364 365 tension 0
+400 365 366 tension 0
+401 366 368 tension 0
+402 367 368 tension 0
+403 234 235 tension 0
+404 235 365 tension 0
+405 361 366 tension 0
+406 360 362 tension 0
+407 360 368 tension 0
+408 362 363 tension 0
+409 203 370 tension 0
+410 203 369 tension 0
+411 371 372 tension 0
+412 374 375 tension 0
+413 376 377 tension 0
+414 380 381 tension 0
+415 92 378 tension 0
+416 92 380 tension 0
+417 379 381 tension 0
+418 382 383 tension 0
+419 208 382 tension 0
+420 384 385 tension 0
+421 385 386 tension 0
+422 383 384 tension 0
+423 123 389 tension 0
+424 218 390 tension 0
+425 389 390 tension 0
+426 217 391 tension 0
+427 217 219 tension 0
+428 219 220 tension 0
+429 390 391 tension 0
+430 222 394 tension 0
+431 230 392 tension 0
+432 392 394 tension 0
+433 233 393 tension 0
+434 392 393 tension 0
+435 395 398 tension 0
+436 395 396 tension 0
+437 396 397 tension 0
+438 397 399 tension 0
+439 398 399 tension 0
+440 9 395 tension 0
+441 53 398 tension 0
+442 241 396 tension 0
+443 243 244 tension 0
+444 244 245 tension 0
+445 245 397 tension 0
+446 245 252 tension 0
+447 250 399 tension 0
+448 400 404 tension 0
+449 400 402 tension 0
+450 401 403 tension 0
+451 401 402 tension 0
+452 403 404 tension 0
+453 106 275 tension 0
+454 108 402 tension 0
+455 275 400 tension 0
+456 105 403 tension 0
+457 244 401 tension 0
+458 405 411 tension 0
+459 405 406 tension 0
+460 406 408 tension 0
+461 407 409 tension 0
+462 407 410 tension 0
+463 408 409 tension 0
+464 410 411 tension 0
+465 253 411 tension 0
+466 256 405 tension 0
+467 79 277 tension 0
+468 277 278 tension 0
+469 278 406 tension 0
+470 109 408 tension 0
+471 276 278 tension 0
+472 275 409 tension 0
+473 404 407 tension 0
+474 254 410 tension 0
+475 280 415 tension 0
+476 281 412 tension 0
+477 412 415 tension 0
+478 277 414 tension 0
+479 412 414 tension 0
+480 93 213 tension 0
+481 93 413 tension 0
+482 212 213 tension 0
+483 413 414 tension 0
+484 416 417 tension 0
+485 418 419 tension 0
+486 386 418 tension 0
+487 417 419 tension 0
+488 420 421 tension 0
+489 416 420 tension 0
+490 113 424 tension 0
+491 115 282 tension 0
+492 282 423 tension 0
+493 423 424 tension 0
+494 282 426 tension 0
+495 415 427 tension 0
+496 426 427 tension 0
+497 413 429 tension 0
+498 427 429 tension 0
+499 93 216 tension 0
+500 215 216 tension 0
+501 385 428 tension 0
+502 428 429 tension 0
+503 430 431 tension 0
+504 431 432 tension 0
+505 116 433 tension 0
+506 436 437 tension 0
+507 430 436 tension 0
+508 286 437 tension 0
+509 438 439 tension 0
+510 287 439 tension 0
+511 440 441 tension 0
+512 121 440 tension 0
+513 121 438 tension 0
+514 288 441 tension 0
+515 442 444 tension 0
+516 442 443 tension 0
+517 289 443 tension 0
+518 445 446 tension 0
+519 287 445 tension 0
+520 25 121 tension 0
+521 26 442 tension 0
+522 290 446 tension 0
+523 448 449 tension 0
+524 447 448 tension 0
+525 293 449 tension 0
+526 450 451 tension 0
+527 444 450 tension 0
+528 452 453 tension 0
+529 295 452 tension 0
+530 451 453 tension 0
+531 454 456 tension 0
+532 455 456 tension 0
+533 295 454 tension 0
+534 292 456 tension 0
+535 457 458 tension 0
+536 298 457 tension 0
+537 24 124 tension 0
+538 24 297 tension 0
+539 296 458 tension 0
+540 459 460 tension 0
+541 299 460 tension 0
+542 461 462 tension 0
+543 24 461 tension 0
+544 463 464 tension 0
+545 299 463 tension 0
+546 462 464 tension 0
+547 465 466 tension 0
+548 306 466 tension 0
+549 467 468 tension 0
+550 465 467 tension 0
+551 307 308 tension 0
+552 308 468 tension 0
+553 469 470 tension 0
+554 306 469 tension 0
+555 471 472 tension 0
+556 133 134 tension 0
+557 134 471 tension 0
+558 294 308 tension 0
+559 470 472 tension 0
+560 134 286 tension 0
+561 473 474 tension 0
+562 387 473 tension 0
+563 474 475 tension 0
+564 476 477 tension 0
+565 477 478 tension 0
+566 479 480 tension 0
+567 478 480 tension 0
+568 482 484 tension 0
+569 482 483 tension 0
+570 481 483 tension 0
+571 485 486 tension 0
+572 476 485 tension 0
+573 487 488 tension 0
+574 486 488 tension 0
+575 489 490 tension 0
+576 309 490 tension 0
+577 140 493 tension 0
+578 140 491 tension 0
+579 494 495 tension 0
+580 496 497 tension 0
+581 495 497 tension 0
+582 498 499 tension 0
+583 496 498 tension 0
+584 314 499 tension 0
+585 500 501 tension 0
+586 148 500 tension 0
+587 148 314 tension 0
+588 501 502 tension 0
+589 503 504 tension 0
+590 315 504 tension 0
+591 505 506 tension 0
+592 317 505 tension 0
+593 316 506 tension 0
+594 507 508 tension 0
+595 43 44 tension 0
+596 43 316 tension 0
+597 152 153 tension 0
+598 153 507 tension 0
+599 317 508 tension 0
+600 509 510 tension 0
+601 149 503 tension 0
+602 149 509 tension 0
+603 510 511 tension 0
+604 512 513 tension 0
+605 318 513 tension 0
+606 516 518 tension 0
+607 516 517 tension 0
+608 330 517 tension 0
+609 435 518 tension 0
+610 519 520 tension 0
+611 330 519 tension 0
+612 521 522 tension 0
+613 520 522 tension 0
+614 523 524 tension 0
+615 489 523 tension 0
+616 525 526 tension 0
+617 524 526 tension 0
+618 527 528 tension 0
+619 521 527 tension 0
+620 529 530 tension 0
+621 174 529 tension 0
+622 174 525 tension 0
+623 64 174 tension 0
+624 284 516 tension 0
+625 528 530 tension 0
+626 531 532 tension 0
+627 533 535 tension 0
+628 533 534 tension 0
+629 532 534 tension 0
+630 333 536 tension 0
+631 538 539 tension 0
+632 531 538 tension 0
+633 540 541 tension 0
+634 331 540 tension 0
+635 333 541 tension 0
+636 542 543 tension 0
+637 349 542 tension 0
+638 334 543 tension 0
+639 544 545 tension 0
+640 334 544 tension 0
+641 335 545 tension 0
+642 546 547 tension 0
+643 342 546 tension 0
+644 548 549 tension 0
+645 547 549 tension 0
+646 550 551 tension 0
+647 552 553 tension 0
+648 548 552 tension 0
+649 80 550 tension 0
+650 80 257 tension 0
+651 82 262 tension 0
+652 551 553 tension 0
+653 554 555 tension 0
+654 194 554 tension 0
+655 556 557 tension 0
+656 555 557 tension 0
+657 558 559 tension 0
+658 80 558 tension 0
+659 560 561 tension 0
+660 556 560 tension 0
+661 559 561 tension 0
+662 562 564 tension 0
+663 563 564 tension 0
+664 335 563 tension 0
+665 85 86 tension 0
+666 196 564 tension 0
+667 339 565 tension 0
+668 566 567 tension 0
+669 346 566 tension 0
+670 568 569 tension 0
+671 567 569 tension 0
+672 570 571 tension 0
+673 568 570 tension 0
+674 572 573 tension 0
+675 340 572 tension 0
+676 341 573 tension 0
+677 341 571 tension 0
+678 574 575 tension 0
+679 347 574 tension 0
+680 195 341 tension 0
+681 348 575 tension 0
+682 84 577 tension 0
+683 578 579 tension 0
+684 352 581 tension 0
+685 356 582 tension 0
+686 581 582 tension 0
+687 358 359 tension 0
+688 359 585 tension 0
+689 582 585 tension 0
+690 237 238 tension 0
+691 238 584 tension 0
+692 240 583 tension 0
+693 583 584 tension 0
+694 586 587 tension 0
+695 91 586 tension 0
+696 369 587 tension 0
+697 588 589 tension 0
+698 370 589 tension 0
+699 591 592 tension 0
+700 588 591 tension 0
+701 207 372 tension 0
+702 207 593 tension 0
+703 594 595 tension 0
+704 371 594 tension 0
+705 373 595 tension 0
+706 596 597 tension 0
+707 206 590 tension 0
+708 206 596 tension 0
+709 598 599 tension 0
+710 373 598 tension 0
+711 90 207 tension 0
+712 205 206 tension 0
+713 597 599 tension 0
+714 600 601 tension 0
+715 376 600 tension 0
+716 374 601 tension 0
+717 602 603 tension 0
+718 377 602 tension 0
+719 378 603 tension 0
+720 604 605 tension 0
+721 91 604 tension 0
+722 92 94 tension 0
+723 94 353 tension 0
+724 203 354 tension 0
+725 353 354 tension 0
+726 379 605 tension 0
+727 607 608 tension 0
+728 606 608 tension 0
+729 214 610 tension 0
+730 336 609 tension 0
+731 609 610 tension 0
+732 611 612 tension 0
+733 607 611 tension 0
+734 613 616 tension 0
+735 613 614 tension 0
+736 614 615 tension 0
+737 615 618 tension 0
+738 616 617 tension 0
+739 617 618 tension 0
+740 393 616 tension 0
+741 394 613 tension 0
+742 219 614 tension 0
+743 217 364 tension 0
+744 235 615 tension 0
+745 359 618 tension 0
+746 238 617 tension 0
+747 584 585 tension 0
+748 94 422 tension 0
+749 375 621 tension 0
+750 422 619 tension 0
+751 619 621 tension 0
+752 620 622 tension 0
+753 621 622 tension 0
+754 423 623 tension 0
+755 425 426 tension 0
+756 425 624 tension 0
+757 623 624 tension 0
+758 625 626 tension 0
+759 626 628 tension 0
+760 629 630 tension 0
+761 23 117 tension 0
+762 117 629 tension 0
+763 432 630 tension 0
+764 631 632 tension 0
+765 434 631 tension 0
+766 433 632 tension 0
+767 633 634 tension 0
+768 117 633 tension 0
+769 434 634 tension 0
+770 635 636 tension 0
+771 435 636 tension 0
+772 639 640 tension 0
+773 447 640 tension 0
+774 455 639 tension 0
+775 641 642 tension 0
+776 479 641 tension 0
+777 475 642 tension 0
+778 221 388 tension 0
+779 221 367 tension 0
+780 360 477 tension 0
+781 387 388 tension 0
+782 643 644 tension 0
+783 487 643 tension 0
+784 362 482 tension 0
+785 481 644 tension 0
+786 514 645 tension 0
+787 646 647 tension 0
+788 43 646 tension 0
+789 648 649 tension 0
+790 647 649 tension 0
+791 650 651 tension 0
+792 648 650 tension 0
+793 138 140 tension 0
+794 491 651 tension 0
+795 652 653 tension 0
+796 535 652 tension 0
+797 492 653 tension 0
+798 654 655 tension 0
+799 492 654 tension 0
+800 139 533 tension 0
+801 493 655 tension 0
+802 656 657 tension 0
+803 147 148 tension 0
+804 149 150 tension 0
+805 315 656 tension 0
+806 502 657 tension 0
+807 659 660 tension 0
+808 659 661 tension 0
+809 151 659 tension 0
+810 494 661 tension 0
+811 153 662 tension 0
+812 663 664 tension 0
+813 658 663 tension 0
+814 665 666 tension 0
+815 512 665 tension 0
+816 312 313 tension 0
+817 511 666 tension 0
+818 667 668 tension 0
+819 309 667 tension 0
+820 669 670 tension 0
+821 166 319 tension 0
+822 319 669 tension 0
+823 668 670 tension 0
+824 673 674 tension 0
+825 514 515 tension 0
+826 515 674 tension 0
+827 675 676 tension 0
+828 539 675 tension 0
+829 192 537 tension 0
+830 537 676 tension 0
+831 536 537 tension 0
+832 677 678 tension 0
+833 562 677 tension 0
+834 565 678 tension 0
+835 680 681 tension 0
+836 193 576 tension 0
+837 332 680 tension 0
+838 576 681 tension 0
+839 682 683 tension 0
+840 578 682 tension 0
+841 684 685 tension 0
+842 679 684 tension 0
+843 683 685 tension 0
+844 686 687 tension 0
+845 580 686 tension 0
+846 577 687 tension 0
+847 688 689 tension 0
+848 351 688 tension 0
+849 351 579 tension 0
+850 83 351 tension 0
+851 580 689 tension 0
+852 690 691 tension 0
+853 690 693 tension 0
+854 691 692 tension 0
+855 692 694 tension 0
+856 693 694 tension 0
+857 581 691 tension 0
+858 583 690 tension 0
+859 424 693 tension 0
+860 353 692 tension 0
+861 354 355 tension 0
+862 422 694 tension 0
+863 619 623 tension 0
+864 695 696 tension 0
+865 484 695 tension 0
+866 697 698 tension 0
+867 696 698 tension 0
+868 699 700 tension 0
+869 697 699 tension 0
+870 590 700 tension 0
+871 701 702 tension 0
+872 592 701 tension 0
+873 593 702 tension 0
+874 703 704 tension 0
+875 606 704 tension 0
+876 705 706 tension 0
+877 612 705 tension 0
+878 610 706 tension 0
+879 708 709 tension 0
+880 707 709 tension 0
+881 710 711 tension 0
+882 216 710 tension 0
+883 708 712 tension 0
+884 221 713 tension 0
+885 391 714 tension 0
+886 713 714 tension 0
+887 389 715 tension 0
+888 714 715 tension 0
+889 627 628 tension 0
+890 627 716 tension 0
+891 421 718 tension 0
+892 625 720 tension 0
+893 721 722 tension 0
+894 638 721 tension 0
+895 723 724 tension 0
+896 116 723 tension 0
+897 285 637 tension 0
+898 637 724 tension 0
+899 637 722 tension 0
+900 725 726 tension 0
+901 635 725 tension 0
+902 638 726 tension 0
+903 727 728 tension 0
+904 311 727 tension 0
+905 729 730 tension 0
+906 728 730 tension 0
+907 731 732 tension 0
+908 729 731 tension 0
+909 322 515 tension 0
+910 645 732 tension 0
+911 733 734 tension 0
+912 660 733 tension 0
+913 658 734 tension 0
+914 735 736 tension 0
+915 664 735 tension 0
+916 662 736 tension 0
+917 671 737 tension 0
+918 671 672 tension 0
+919 738 739 tension 0
+920 576 738 tension 0
+921 679 739 tension 0
+922 740 742 tension 0
+923 741 742 tension 0
+924 707 740 tension 0
+925 213 742 tension 0
+926 703 741 tension 0
+927 743 744 tension 0
+928 711 743 tension 0
+929 712 744 tension 0
+930 745 746 tension 0
+931 717 745 tension 0
+932 716 746 tension 0
+933 747 748 tension 0
+934 719 747 tension 0
+935 717 748 tension 0
+936 749 753 tension 0
+937 749 750 tension 0
+938 750 752 tension 0
+939 751 754 tension 0
+940 751 758 tension 0
+941 752 757 tension 0
+942 753 755 tension 0
+943 754 756 tension 0
+944 755 759 tension 0
+945 756 757 tension 0
+946 758 759 tension 0
+947 425 751 tension 0
+948 428 754 tension 0
+949 624 627 tension 0
+950 719 758 tension 0
+951 718 756 tension 0
+952 760 761 tension 0
+953 620 760 tension 0
+954 720 761 tension 0
+955 762 763 tension 0
+956 319 762 tension 0
+957 764 765 tension 0
+958 763 765 tension 0
+959 767 768 tension 0
+960 764 767 tension 0
+961 766 768 tension 0
+962 673 769 tension 0
+963 770 771 tension 0
+964 772 773 tension 0
+965 770 772 tension 0
+966 737 773 tension 0
+967 774 775 tension 0
+968 388 774 tension 0
+969 776 777 tension 0
+970 775 777 tension 0
+971 778 779 tension 0
+972 779 780 tension 0
+973 778 781 tension 0
+974 782 783 tension 0
+975 780 782 tension 0
+976 783 784 tension 0
+977 459 785 tension 0
+978 786 787 tension 0
+979 786 788 tension 0
+980 715 786 tension 0
+981 785 788 tension 0
+982 789 790 tension 0
+983 787 790 tension 0
+984 791 792 tension 0
+985 672 791 tension 0
+986 320 671 tension 0
+987 766 792 tension 0
+988 793 794 tension 0
+989 771 793 tension 0
+990 769 794 tension 0
+991 795 796 tension 0
+992 776 795 tension 0
+993 713 779 tension 0
+994 781 796 tension 0
+995 797 798 tension 0
+996 784 798 tension 0
+997 789 797 tension 0
+
+FACETS
+
+1 -4 -3 -1 2 5
+2 -10 -9 8 -5 -7 6
+3 -16 -11 12 15 -14 -6 13
+4 -22 -21 -20 -18 17 19
+5 -23 24 25 -26 27 28
+6 -29 30 -31 32 33
+7 -35 -28 34 29 36
+8 -41 -40 -37 38 39
+9 -38 -45 44 -46 -42 3 43
+10 -39 -43 4 -8 -48 47
+11 -49 23 35 50 51
+12 -56 -55 54 -53 52 57
+13 -61 -52 58 59 60 62
+14 -66 -63 -58 53 64 65
+15 -71 -67 68 69 70
+16 -70 73 -13 7 -2 72 74
+17 -79 -78 -76 75 77 80
+18 -81 10 14 82 79
+19 -85 -84 16 -73 -69 83
+20 -90 -89 -88 -86 18 87
+21 -94 -87 20 -92 91 93
+22 -102 -99 -95 96 100 -97 98 101
+23 -104 103 -107 -105 106 108
+24 -106 -109 92 21 110
+25 -112 -111 -91 109 105 113 114
+26 -119 -118 -103 -115 116 117
+27 -125 -122 -121 120 123 124
+28 -120 -126 97 127 128
+29 -131 -130 129 -134 -132 133 122
+30 -123 -128 -139 -138 -135 136 137
+31 -124 -137 -141 140
+32 -143 -142 88 144 145
+33 -149 -148 45 37 -147 146 143
+34 -151 -108 -110 22 150 152
+35 -153 115 104 151 154
+36 -158 -155 26 156 157
+37 -161 147 40 -159 160 162
+38 -163 -17 86 142 -146 161 164
+39 -167 -165 -30 -34 -27 155 166
+40 -173 -170 -168 169 171 172
+41 -169 -174 -150 -19 163 175
+42 -171 -175 -164 -162 176 177
+43 -172 -177 -178 31 165 179
+44 -182 -181 180 183 184
+45 -180 -185 159 41 -47 186
+46 -187 -32 178 -176 -160 185 181
+47 -189 -188 -50 -36 -33 187 182
+48 -183 -186 48 9 81 -80 190
+49 -184 -190 -77 -192 191 189
+50 -195 -194 -98 126 121 -133 193
+51 -202 203 204 -201 200 205
+52 -214 -213 -212 -211 210
+53 -217 -216 215 213
+54 -221 -220 -219 218 222 223
+55 -225 192 -75 -224 217 214 226 219
+56 -228 -227 -51 188 -191 225 220
+57 -231 230 -65 229 232
+58 -235 -229 -64 -54 233 234
+59 -238 237 -236 231 239
+60 -245 -244 -243 -241 240 242 246
+61 -240 -249 -223 -247 56 248
+62 -250 228 221 249 241
+63 -242 -248 -57 61 251 252
+64 -253 -24 49 227 250 243
+65 -259 -256 -255 254 -257 258 260
+66 -254 -262 261 263 264
+67 -267 -266 265 268 269
+68 -268 -273 272 -270 271
+69 -278 277 -279 -276 -274 275 280 281
+70 -283 -260 282 267 284 274
+71 -275 -284 -269 -271 -285 130 286
+72 -287 288 259 283 276
+73 -277 -292 291 -289 290 293
+74 -295 294 296 292 278
+75 -280 -286 131 125 -140 297
+76 -281 -297 141 -136 -298 295
+77 -302 -299 66 -230 236 300 301
+78 -305 -304 -303 -59 63 299 306
+79 -307 71 -74 308 309
+80 -311 -308 -72 1 42 310
+81 -315 -313 11 84 314
+82 -323 -322 -320 -318 319 321
+83 -325 326 327 328 212 -215 324 318
+84 -319 -324 216 224 76 329
+85 -330 331 -332 333 325 320
+86 -321 -329 78 -82 -15 334
+87 -338 -337 -336 335 330 322
+88 -334 -12 313 340 -339 338 323
+89 -344 -343 -93 111 342
+90 -349 -348 -144 89 347
+91 -351 -347 90 94 343 350
+92 -357 -356 -352 353 354 355 358
+93 -360 139 -127 -100 359 352
+94 -353 -359 -96 361 -116 153 362
+95 -354 -362 -154 -152 174 168 363
+96 -355 -363 170 364
+97 -367 -365 366 138 360 356
+98 -369 -166 158 -368 367 357
+99 -358 -364 173 -179 167 369
+100 -386 -385 -203 383 384
+101 -388 387 201 389 390
+102 -393 -392 -391 388 394
+103 -396 -200 -387 391 395 397
+104 -401 -400 -399 398 402
+105 -405 -395 392 403 404 400
+106 -407 406 408 -397 405 401
+107 -424 -326 -333 423 425
+108 -426 427 428 -327 424 429
+109 -432 -431 -218 -226 -210 430
+110 -433 -233 55 247 -222 431 434
+111 -438 -437 -436 435 439
+112 -435 -440 365 368 -157 441
+113 -442 -294 298 135 -366 440 436
+114 -445 -444 -443 -291 -296 442 437
+115 -447 245 -446 445 438
+116 -439 -441 -156 -25 253 244 447
+117 -452 -450 451 -449 448
+118 -454 -251 -62 453 455 449
+119 -456 289 443 457 450
+120 -451 -457 444 446 -246 -252 454
+121 -464 -462 461 -463 -460 -459 458
+122 -458 -466 256 -288 465
+123 -469 -468 -467 262 255 466 459
+124 -470 304 471 469 460
+125 -461 -473 -448 -455 472
+126 -474 -290 456 452 473 462
+127 -472 -453 -60 303 470 463
+128 -465 287 279 -293 474 464
+129 -477 -476 -306 302 475
+130 -478 468 -471 305 476 479
+131 -483 -481 480 -482 -261 467 478
+132 -493 -492 -491 -300 -237 490
+133 -495 -475 -301 491 494 496
+134 -497 483 -479 477 495 498
+135 -502 -501 -420 -422 -418 -419 206 208 -207 209 500 -499 481 497
+136 -518 -519 510 -509 -513 -520 336 521 516 -517 312 522
+137 -531 -533 529 528 -530 -526 -527 -515 -521 337 339 534
+138 -535 -536 -317 -538 537 -331 -335 520 512 511 -514 316 539
+139 -559 -553 -554 548 -547 550 549 -552 -558 -314 85 556 557 555
+140 -594 -598 -597 -117 -361 95 -595 596 593 -591 -592 599
+141 -625 -618 -619 612 -613 -610 -611 608 -607 -624 -310 46 623 621 620
+142 -647 -648 644 -645 -642 -643 375 377 -376 -380 651 266 -282 -258 -650 649 646 652
+143 -663 -664 641 -639 -640 638 -636 -637 381 -382 -198 -665 -129 285 270 666
+144 -678 -679 -378 669 668 671 -670 673 672 -677 -680 273 -265 -651 379 681
+145 -685 -389 -204 385 684 686
+146 -688 -687 -394 -390 685 689
+147 -693 -692 -239 -232 235 690 691
+148 -709 -710 705 -703 -704 411 -701 -711 -383 202 712 708 706 713
+149 -726 417 -414 -416 722 723 725 -724 410 696 -694 -695 721 720
+150 -731 -730 371 -372 654 653 656 -655 660 659 -661 -657 -658 650 257 -264 729
+151 -739 -738 -734 735 736 737
+152 -740 -434 432 741 734
+153 -735 -741 -430 211 -328 -428 742
+154 -736 -742 -427 743 399 -404 744
+155 -737 -744 -403 393 687 745
+156 -746 -690 -234 433 740 738
+157 -745 688 -747 -691 746 739
+158 -751 -750 -748 -722 415 719 -717 -718 -413 715 714 -716 412 749
+159 -756 755 -494 492 754 757
+160 -763 -504 -503 507 506 -508 -560 -556 -83 -68 761 762 760
+161 -772 -774 532 -534 -340 315 558 -551 -341 525 -523 -524 773
+162 -775 -776 566 -567 -565 -780 407 -402 -779 778 -781 562 561 563 777
+163 -785 570 -569 -784 -406 780 -564 572 571 574 -573 783 782
+164 -791 -792 789 -790 -787 -788 595 99 793 578 794
+165 -801 -577 -793 102 800 627 796 795 -797 799 798
+166 -802 -805 590 -589 -601 804 -114 803 586 585 588 806
+167 -810 579 581 -580 583 582 -584 -587 -803 -113 107 118 809 808
+168 -814 -815 604 -605 -346 -816 -342 112 -804 602 600 603 817
+169 -823 -818 -819 576 -575 615 614 617 -616 -622 -623 -44 148 821 822 820
+170 -827 -828 -631 -632 626 629 -628 -800 -101 194 829 830
+171 -832 -833 662 -666 -272 680 676 -674 -675 -374 373 667 834
+172 -835 -837 -370 634 633 -635 630 831 -829 195 836 838
+173 -847 -848 -850 134 665 197 196 -199 682 846 -844 -845 851
+174 -856 -853 852 854 855
+175 -852 -858 693 747 -689 -686 857
+176 -859 -490 238 692 858 853
+177 -854 -857 -684 386 -861 -725 860
+178 -855 -860 -723 748 862
+179 -862 750 863 -754 493 859 856
+180 -870 -707 -712 -205 396 -408 784 568 865 864 867 -866 869 868
+181 -871 -872 -699 -700 697 -698 -409 724 861 -384 711 702 873
+182 -886 -884 779 -398 -743 426 885
+183 -888 -885 -429 -425 887
+184 -895 -896 505 766 -764 -765 769 -767 -768 -761 67 307 897 898
+185 -902 894 893 -899 -897 -309 311 624 606 -609 771 -770 901 900
+186 -910 -786 825 -909 -350 344 816 -345 904 903 906 -905 908 907
+187 -914 -915 -812 -813 913 -911 -912 -807 -809 119 597 811 916
+188 -919 -920 -836 -193 132 850 849 -683 840 839 843 -841 -842 921
+189 -923 -926 874 -875 728 -727 733 732 877 876 -878 -729 -263 482 925
+190 -929 -883 879 -880 924 922 -925 -480 499 882 881 928 927
+191 -944 -942 -936 937 938 941 -945 -943 -939 940 946
+192 -948 502 -498 -496 -755 947 939
+193 -940 -947 756 949 890 932 -930 -931 935 -933 -934 950
+194 -951 -891 -488 -489 484 487 -485 -486 -421 501 948 943
+195 -954 -892 758 759 -889 -949 -757 -863 751 753 -752 953 952
+196 -979 -980 -887 -423 332 -537 543 542 546 -544 -545 541 -540 977 981
+197 -987 961 -959 -960 957 -958 -955 -956 -821 149 -145 348 986 918 985 984
+198 -988 -989 -963 965 964 -966 -917 -986 349 351 909 826 -824 962 990
+199 -991 -992 969 -970 -967 -968 -778 884 993 -971 973 994
+200 -996 -976 -974 -975 -972 -993 886 888 980 978 983 -982 997 995
+
+
+read 
+ps_colorflag on;
+FULL_BOUNDING_BOX on;
+
+recording := 0;
+simulation_time := 0;
+
+// Varables to be tracked
+wound_area := 0
+total_t1s := 0;
+
+wound_t1s := 0;
+output_name := "wound_healing";	// id for record files
+
+read "parameters.inp";
+read "dynamics.secmd";
+read "wound_creation.secmd";
+
+//------------------------- Initialize ----------------------------//
+                          
+init_simulation_stats;
+
+foreach facet ff do {set ff.cell_age random * min_mitosis_age;}
+
+init_method_instance;
+set_cell_properties;
+initialize_polarization_facet;
+
+set edges color black;
+
+// Only one edge on boundary
+foreach edge ee where valence == 1 and wound_edge != 1 do
+{
+	if ee.vertex[1].valence == 2 or ee.vertex[2].valence == 2 then delete ee;
+};
+
+// Show simulation in real time - comment to turn off
+showq;
+
+// Relax a bit to energy minimium
+relax_one 50;
+
+conj_grad off;
+m 0;
+
+simulation_step := 0;
+
+
+//------------------------ Run simulation -----------------------------//
+
+
+// Grow cells
+recording := 1;
+simulation_time := 0;
+
+// Simulate unwounded for 1 hour
+do {move_one;} while (simulation_time < 60 * 60 * 1);
+
+// Variable used in recording
+cell_area := 0;
+cell_perimeter := 0;
+
+// Then create wound
+ablate_wound;
+get_wound_distance;
+foreach facet ff do {ff.initial_distance := ff.wound_distance;};
+
+// Reset statistics
+simulation_step := 0;
+simulation_time := 0;
+total_t1s := 0;
+set edge cell1 0;
+set edge cell2 0;
+set edge cell3 0;
+set edge cell4 0;
+set edge t1_count 0;
+set edge last_t1 0;
+
+// And heal!
+do {move_one;} while (simulation_time < 60 * 60 * 5 and sum(facet[newf].edge, 1) > 2 and wound_area > 0.05)
+
+quit 0;

@@ -1,0 +1,191 @@
+//-----------------------------------------------------------------//
+                          /*Create a wound*/
+//-----------------------------------------------------------------//
+
+poke_wound:=
+{
+
+    define wound_facets_bulk integer[max(facet, id)];
+	define wound_edges_bulk integer[max(edge, id)];
+	define wound_vertices_bulk integer[max(vertex, id)];
+
+	//Elliptic constants
+	aa := wound_radius^2 * wound_aspect_ratio;
+	bb := wound_radius^2 / wound_aspect_ratio;
+
+
+	// Define cell facets belonging to wound
+	foreach vertex vv where (vv.x-wound_center_x)^2 / aa +(vv.y-wound_center_y)^2 / bb < 1 do
+	{
+		wound_facets_bulk[vv.facet[1].id]:=1;
+		wound_facets_bulk[vv.facet[2].id]:=1;
+		wound_facets_bulk[vv.facet[3].id]:=1;
+	};
+	
+	// make cells in the wound carry no energy
+	foreach facet ff where wound_facets_bulk[ff.id]>0 do
+	{
+        mycom := sprintf "per%g.modulus:=0",ff.id; 
+        exec mycom;      
+        mycom := sprintf "ten%g.modulus:=0",ff.id; 
+        exec mycom;
+        mycom := sprintf "farea%g.modulus:=0",ff.id; 
+        exec mycom;
+        mycom := sprintf "sq_farea%g.modulus:=0",ff.id; 
+        exec mycom;
+	};
+
+	// define vertices and edges INSIDE wound
+	foreach vertex vv where sum(vv.facets,1) == 3 AND wound_facets_bulk[vv.facet[1].id]+wound_facets_bulk[vv.facet[2].id]+wound_facets_bulk[vv.facet[3].id] == 3 
+	do {wound_vertices_bulk[vv.id]:=1};
+
+
+	foreach edges ee where ee.valence == 2 AND wound_facets_bulk[ee.facet[1].id]+wound_facets_bulk[ee.facet[2].id] == 2 
+	do {wound_edges_bulk[ee.id]:=1};
+
+
+	foreach edges ee where ee.valence == 2 AND wound_facets_bulk[ee.facet[1].id]+wound_facets_bulk[ee.facet[2].id] == 1
+	do 
+	{
+		ee.wound_edge := 1; 
+		facet[ee.facet[1].id].wound_facet:=1;
+		facet[ee.facet[2].id].wound_facet:=1;
+		set ee color red;
+
+	};
+
+
+	dissolve facets ff where wound_facets_bulk[ff.id] == 1 ;
+	dissolve edges ee where wound_edges_bulk[ee.id] == 1 ; 
+ 	dissolve vertices vv where wound_vertices_bulk[vv.id] == 1 ;
+
+ 	init_method_instance;
+
+};
+            
+
+
+
+
+//-----------------------------------------------------------------//
+// Create an artificial facet at the wound site, this will allow for proper cell rearrangements and also cells can leave the wound edge or become a part of it. 
+//-----------------------------------------------------------------//
+
+
+
+create_wound_facet:=
+{	
+	wound_edge_count := sum(edges,wound_edge);
+	
+	print wound_edge_count;
+	
+	define oid_list integer[wound_edge_count];
+
+	foreach edge ee where wound_edge == 1 do {oid_list[1]:=ee.id; break};
+	
+	for ( ii := 2 ; ii <  wound_edge_count+1; ii += 1 ) 
+		{
+			vid1:=edge[oid_list[ii-1]].vertex[2].id;
+			eid := abs(oid_list[ii-1]);
+			if sum(edges ee where ee.vertex[1].id == vid1 AND ee.wound_edge == 1 AND ee.id != eid,1) == 1
+				then
+				{
+					oid_list[ii] := sum(edges ee where ee.vertex[1].id == vid1 AND ee.wound_edge == 1 AND ee.id != eid,id);
+				}
+				
+			else 		
+				{
+					oid_list[ii] := -sum(edges ee where ee.vertex[2].id == vid1 AND ee.wound_edge == 1 AND ee.id != eid,id);
+				}	
+			
+		};
+
+	
+	cmd_string := sprintf "newf:=new_facet( %d",oid_list[1];
+
+	for ( ii := 2 ; ii <  wound_edge_count + 1; ii += 1 ) 
+		{
+			cmd_string := sprintf "%s, %d", cmd_string,  oid_list[ii];
+		};
+	cmd_string := sprintf "%s )", cmd_string;
+	exec cmd_string;
+}
+
+// Wound cells by removing their perimeter terms, leading to expansion      
+ablate_wound:=
+{
+
+	define wound_facets_bulk integer[maximum(max(facet, id), 500)];
+	define wound_edges_bulk integer[max(edge, id)];
+	define wound_vertices_bulk integer[max(vertex, id)];
+	
+	print max(facet, id);
+	print wound_facets_bulk;
+
+	//Elliptic constants
+	aa := wound_radius^2 * wound_aspect_ratio;
+	bb := wound_radius^2 / wound_aspect_ratio;
+
+
+	// Define cell facets belonging to wound
+	foreach vertex vv where (vv.x-wound_center_x)^2 / aa +(vv.y-wound_center_y)^2 / bb < 1 do {wound_facets_bulk[vv.facet[1].id]:=1; wound_facets_bulk[vv.facet[2].id]:=1;};
+	
+    cells_removed := 0;
+    
+	// Make cells in the wound carry no energy
+	foreach facet ff where wound_facets_bulk[ff.id]>0 do
+	{
+        mycom := sprintf "per%g.modulus:=0",ff.id; 
+        exec mycom;      
+        mycom := sprintf "ten%g.modulus:=0",ff.id; 
+        exec mycom;
+        mycom := sprintf "farea%g.modulus:=0",ff.id; 
+        exec mycom;
+        mycom := sprintf "sq_farea%g.modulus:=0",ff.id; 
+        exec mycom;
+        
+        cells_removed := cells_removed + 1;
+	};
+
+	// define vertices and edges INSIDE wound
+	foreach vertex vv where sum(vv.facets,1) == 3 AND wound_facets_bulk[vv.facet[1].id]+wound_facets_bulk[vv.facet[2].id]+wound_facets_bulk[vv.facet[3].id] == 3 
+	do {wound_vertices_bulk[vv.id]:=1};
+
+
+	foreach edges ee where ee.valence == 2 AND wound_facets_bulk[ee.facet[1].id]+wound_facets_bulk[ee.facet[2].id] == 2 
+	do {wound_edges_bulk[ee.id]:=1};
+
+
+	foreach edges ee where ee.valence == 2 AND wound_facets_bulk[ee.facet[1].id]+wound_facets_bulk[ee.facet[2].id] == 1
+	do 
+	{
+		ee.wound_edge := 1; 
+		facet[ee.facet[1].id].wound_facet:=1;
+		facet[ee.facet[2].id].wound_facet:=1;
+		set ee color red;
+
+	};
+
+
+	dissolve facets ff where wound_facets_bulk[ff.id] == 1 ;
+	dissolve edges ee where wound_edges_bulk[ee.id] == 1 ; 
+ 	dissolve vertices vv where wound_vertices_bulk[vv.id] == 1 ;
+
+    // Make the wound facet and give it an area term
+    create_wound_facet;
+    
+    // It's preferred area is the total of the cells ablated
+    mycom := sprintf "farea%g.modulus:= %f * 0.125", newf, cells_removed; 
+    exec mycom;
+    mycom := sprintf "sq_farea%g.modulus := 0.125", newf; 
+    exec mycom;
+    
+    //Also remove half the tension because two cells add to the tension
+    set edge where wound_edge tension edge_tension;
+
+ 	init_method_instance;
+
+ 	print cells_removed;
+
+};
+
